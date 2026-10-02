@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 1qVMkFmcKqALnwf27uUPC1T9Ni1mfXa3IzXXdVCPxvSiSJfkdt4NnZ7BWh5lNyi
+
 
 -- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
@@ -26,14 +26,12 @@ DROP DATABASE IF EXISTS "GestHor";
 -- Name: GestHor; Type: DATABASE; Schema: -; Owner: postgres
 --
 
-CREATE DATABASE "GestHor" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'C.UTF-8';
+CREATE DATABASE "GestHor" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'C';
 
 
 ALTER DATABASE "GestHor" OWNER TO postgres;
 
-\unrestrict 1qVMkFmcKqALnwf27uUPC1T9Ni1mfXa3IzXXdVCPxvSiSJfkdt4NnZ7BWh5lNyi
 \connect "GestHor"
-\restrict 1qVMkFmcKqALnwf27uUPC1T9Ni1mfXa3IzXXdVCPxvSiSJfkdt4NnZ7BWh5lNyi
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -2039,5 +2037,5 @@ ALTER TABLE ONLY public.salones
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 1qVMkFmcKqALnwf27uUPC1T9Ni1mfXa3IzXXdVCPxvSiSJfkdt4NnZ7BWh5lNyi
+
 
