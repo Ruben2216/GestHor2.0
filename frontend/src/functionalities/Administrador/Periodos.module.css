@@ -1,0 +1,67 @@
+.periodos__title {
+    margin-bottom: 12px;
+}
+
+.periodos__fullWidth {
+    width: 100%;
+}
+
+.periodos__card {
+    margin-bottom: 12px;
+}
+
+.periodos__toggle {
+    margin-top: 0;
+    cursor: pointer;
+}
+
+.periodos__sectionSpacing {
+    margin-bottom: 16px;
+}
+
+.periodos__form {
+    width: 100%;
+}
+
+.periodos__inputFull {
+    width: 100%;
+}
+
+.periodos__row2 {
+    margin-top: 8px;
+}
+
+.periodos__actionsRow {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.periodos__error {
+    color: red;
+    margin-top: 8px;
+}
+
+.periodos__listSection {
+    margin-top: 18px;
+}
+
+.periodos__listTitle {
+    margin-top: 0;
+}
+
+.periodos__thSmall {
+    width: 150px;
+}
+
+.periodos__thMed {
+    width: 180px;
+}
+
+.periodos__cardFull {
+    width: 100%;
+}
+
+.periodos__tiposPadding {
+    padding-top: 8px;
+}

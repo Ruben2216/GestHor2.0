@@ -1,0 +1,163 @@
+.solicitudes__header {
+    margin-bottom: 16px;
+}
+
+.solicitudes__title {
+    margin: 0;
+}
+
+.solicitudes__subtitle {
+    margin-top: 4px;
+}
+
+.solicitudes__statsGrid {
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 16px;
+}
+
+.solicitudes__statLabel {
+    color: var(--muted);
+}
+
+.solicitudes__statValue {
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.solicitudes__statValue--orange {
+    color: #ea580c;
+}
+
+.solicitudes__statValue--green {
+    color: #16a34a;
+}
+
+.solicitudes__statValue--blue {
+    color: #2563eb;
+}
+
+.solicitudes__pendingCard {
+    margin-bottom: 16px;
+}
+
+.solicitudes__pendingHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.solicitudes__pendingTitle {
+    margin: 0;
+}
+
+.solicitudes__requestsGrid {
+    gap: 12px;
+}
+
+.solicitudes__requestCard {
+    border: 1px solid transparent;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.solicitudes__requestCard--URGENTE {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.solicitudes__requestCard--NORMAL {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.solicitudes__requestCard--BAJA {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.solicitudes__requestInner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.solicitudes__requestMetaWrap {
+    display: flex;
+    gap: 12px;
+}
+
+.solicitudes__requestName {
+    font-weight: 700;
+}
+
+.solicitudes__pill {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.solicitudes__pill--URGENTE {
+    background: #fef3c7;
+    color: #a16207;
+}
+
+.solicitudes__pill--NORMAL {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.solicitudes__pill--BAJA {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.solicitudes__requestDetails {
+    margin-top: 8px;
+}
+
+.solicitudes__requestText {
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.solicitudes__actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.solicitudes__activityTitle {
+    margin-top: 0;
+}
+
+.solicitudes__activityGrid {
+    gap: 8px;
+}
+
+.solicitudes__activityCard {
+    padding: 10px;
+}
+
+.solicitudes__activityCard--success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.solicitudes__activityCard--info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.solicitudes__activityInner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.solicitudes__activityText {
+    font-size: 14px;
+}

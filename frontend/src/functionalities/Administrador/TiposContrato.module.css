@@ -1,0 +1,55 @@
+.tipos__form {
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.tipos__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: center;
+}
+
+.tipos__inputFull {
+    width: 100%;
+}
+
+.tipos__mt8 {
+    margin-top: 8px;
+}
+
+.tipos__actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.tipos__list {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.tipos__listItem {
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tipos__hintTop {
+    margin-top: 4px;
+}
+
+.tipos__itemActions {
+    display: flex;
+    gap: 8px;
+}
+
+.tipos__card {
+    margin-top: 12px;
+}
+
+.tipos__toggle {
+    margin-top: 0;
+    cursor: pointer;
+}

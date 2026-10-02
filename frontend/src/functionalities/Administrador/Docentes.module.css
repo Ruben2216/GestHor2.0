@@ -1,0 +1,49 @@
+.docentes__page-header {
+    margin-bottom: 16px
+}
+
+.docentes__main-title {
+    margin: 0
+}
+
+.docentes__main-subtitle {
+    margin-top: 4px
+}
+
+.docentes__grid {
+    margin-bottom: 24px
+}
+
+.docentes__form-title {
+    margin-top: 0
+}
+
+.docentes__form-section {
+    margin-top: 12px
+}
+
+.docentes__submit {
+    margin-top: 16px
+}
+
+.docentes__cancel {
+    margin-top: 16px;
+    margin-left: 8px
+}
+
+.docentes__search-wrapper {
+    margin-bottom: 12px
+}
+
+.docentes__list-item {
+    margin-bottom: 8px
+}
+
+.docentes__contract-hint {
+    color: var(--primary);
+    font-weight: 500
+}
+
+.docentes__item-actions {
+    margin-top: 8px
+}

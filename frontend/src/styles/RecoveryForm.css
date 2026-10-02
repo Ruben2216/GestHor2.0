@@ -1,0 +1,436 @@
+/* Animaciones personalizadas */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Variables para colores */
+:root {
+  --dark-blue: #298ce7;
+  --white: #ffffff;
+  --light-text: #f0f0f0;
+  --input-border: #cccccc;
+  --button-blue: #007bff; 
+}
+
+/* Estilo del Contenedor Principal */
+.recovery-container {
+  display: flex;
+  height: 100vh;
+  background: linear-gradient(-45deg, #1a5fb4, #298ce7, #3598db, #2980b9);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  color: var(--light-text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efectos decorativos de fondo */
+.recovery-container::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -250px;
+  left: -150px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.recovery-container::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  bottom: -200px;
+  right: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+/* --- Columna de Información (Izquierda) --- */
+.info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 7% 0 7%;
+  max-width: 40%;
+  position: relative;
+  z-index: 1;
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.system-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 0.3em;
+  line-height: 1.1;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(to right, #fff, #e3f2fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.3);
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.system-subtitle {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 1.5em;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  animation: slideInLeft 0.9s ease-out;
+}
+
+.recovery-info {
+  font-size: 1.1rem;
+  max-width: 90%;
+  line-height: 1.6;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+  animation: slideInLeft 1s ease-out;
+}
+
+/* --- Tarjeta del Formulario (Derecha) --- */
+.form-card-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 7% 1rem 3%;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+  animation: slideInRight 0.8s ease-out;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  color: #333;
+  padding: 40px 36px;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+/* Estilos personalizados para el scrollbar */
+.form-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.form-card::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0 30px 30px 0;
+}
+
+.form-card::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #298ce7, #1a5fb4);
+  border-radius: 10px;
+}
+
+.form-card::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1a5fb4, #298ce7);
+}
+
+
+.form-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35),
+              0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+}
+
+.card-title {
+  text-align: center  ;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.1em;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #1a5fb4, #298ce7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-subtitle {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 1.2em;
+  font-weight: 400;
+}
+
+/* --- Estilos del Formulario y Campos --- */
+.recovery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-group {
+  width: 100%;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #e0e0e0, #f0f0f0) border-box;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border: 2px solid transparent;
+  outline: none;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #298ce7, #1a5fb4) border-box;
+  box-shadow: 0 8px 16px rgba(41, 140, 231, 0.2);
+  transform: translateY(-2px);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  resize: vertical;
+  height: 120px;
+  min-height: 80px;
+  max-height: 200px
+}
+
+/* Mensaje Importante (texto pequeño y gris) */
+.important-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  padding: 12px;
+  background: rgba(41, 140, 231, 0.05);
+  border-left: 3px solid #298ce7;
+  border-radius: 8px;
+}
+
+/* Botón de Enviar Solicitud */
+.submit-button {
+  background: linear-gradient(135deg, #298ce7 0%, #1a5fb4 100%);
+  color: var(--white);
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 8px 20px rgba(41, 140, 231, 0.4);
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.submit-button:hover::before {
+  left: 100%;
+}
+
+.submit-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(41, 140, 231, 0.5);
+}
+
+.submit-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(41, 140, 231, 0.4);
+}
+
+/* Enlace de Volver */
+.back-link-container {
+  text-align: center;
+  margin-top: 1.2rem;
+}
+
+.back-link {
+  color: #298ce7;
+  font-size: 0.95rem;
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.back-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, #298ce7, #1a5fb4);
+  transition: width 0.3s ease;
+}
+
+.back-link:hover::after {
+  width: 100%;
+}
+
+.back-link:hover {
+  color: #1a5fb4;
+}
+
+
+@media (max-width: 768px) {
+  .recovery-container {
+    flex-direction: column;
+    height: auto; /* Permite que la altura se ajuste al contenido */
+  }
+
+  .info-column {
+    max-width: 100%;
+    padding: 3rem 10%;
+    text-align: center;
+    align-items: center;
+  }
+  
+  .recovery-info {
+      max-width: 100%;
+      text-align: center;
+  }
+
+  .form-card-wrapper {
+    padding: 2rem 10%;
+  }
+
+  .form-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-column {
+    padding: 1.2rem 5%;
+  }
+
+  .system-title {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+
+  .system-subtitle {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  .form-card {
+    padding: 20px 14px;
+    border-radius: 14px;
+    max-width: 100%;
+    margin: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+  }
+
+  .recovery-form .form-group input,
+  .recovery-form .form-group textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .important-note {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .submit-button {
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+}

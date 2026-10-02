@@ -1,0 +1,140 @@
+.profesorDetails {
+    /* No modal-specific styles here, just content layout */
+    padding-top: 16px; /* Add some space from the top of the card */
+}
+
+.profesorHeader {
+    background-color: var(--primary-light);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.profesorName {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.mainContent {
+    min-width: 0;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionTitle {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.emptyState {
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.turnoSection {
+    margin-bottom: 24px;
+}
+
+.turnoTitle {
+    font-weight: 600;
+    text-transform: capitalize;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.slotsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.slotItem {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.slotDay {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.slotTime {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.listItem {
+    padding: 10px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.prefsBox {
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+}
+
+.prefItem {
+    margin-bottom: 16px;
+}
+.prefItem:last-child {
+    margin-bottom: 0;
+}
+
+.prefLabel {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+.prefValue {
+    color: var(--muted);
+    text-transform: capitalize;
+}
+
+.prefComment {
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+}
+
+@media (max-width: 992px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

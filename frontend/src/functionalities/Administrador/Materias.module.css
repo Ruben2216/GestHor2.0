@@ -1,0 +1,82 @@
+.materias__header {
+    margin-bottom: 16px;
+}
+
+.materias__title {
+    margin: 0;
+}
+
+.materias__subtitle {
+    margin-top: 4px;
+}
+
+.materias__grid {
+    margin-bottom: 16px;
+    gap: 16px;
+}
+
+.materias__cardTitle {
+    margin-top: 0;
+}
+
+.materias__formRow {
+    margin-bottom: 12px;
+}
+
+.materias__actions {
+    display: flex;
+    gap: 10px;
+}
+
+.materias__listHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.materias__listTitle {
+    margin: 0;
+}
+
+.materias__search {
+    margin-bottom: 12px;
+}
+
+.materias__listContainer {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.materias__listItem {
+    margin-bottom: 8px;
+    padding: 12px;
+}
+
+.materias__listItemInner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.materias__itemMain {
+    flex: 1;
+}
+
+.materias__itemTitle {
+    font-weight: 600;
+}
+
+.materias__hint {
+    margin-top: 4px;
+}
+
+.materias__itemActions {
+    display: flex;
+    gap: 4px;
+}
+
+.materias__howList {
+    margin-bottom: 0;
+    padding-left: 20px;
+}

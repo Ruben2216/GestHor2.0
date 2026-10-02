@@ -1,0 +1,171 @@
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.table th,
+.table td {
+    border: 1px solid var(--border);
+    padding: 8px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.timeHeader {
+    width: 120px;
+}
+
+.timeCell {
+    font-weight: 600;
+    font-size: 12px;
+    background-color: #f8f9fa;
+    vertical-align: middle;
+}
+
+.eventCell {
+    padding: 4px;
+    min-height: 80px;
+}
+
+.event {
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: left;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.event:hover .eventActions {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: #25252973;
+}
+
+.eventSubject {
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.eventRoom {
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.eventActions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    text-align: right;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.eventActions button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.eventActions button:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.message {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border-radius: 8px;
+}
+
+/* Colores de eventos */
+.c-blue {
+    background-color: #3498db;
+}
+
+.c-green {
+    background-color: #2ecc71;
+}
+
+.c-yellow {
+    background-color: #f1c40f;
+    color: #333;
+}
+
+.c-red {
+    background-color: #e74c3c;
+}
+
+.c-purple {
+    background-color: #9b59b6;
+}
+
+.c-cyan {
+    background-color: #1abc9c;
+}
+
+.c-pink {
+    background-color: #fd79a8;
+}
+
+.c-teal {
+    background-color: #00cec9;
+}
+
+.c-amber {
+    background-color: #f39c12;
+}
+
+.c-lime {
+    background-color: #badc58;
+    color: #333;
+}
+
+.c-indigo {
+    background-color: #8e44ad;
+}
+
+.c-blue .eventActions button,
+.c-green .eventActions button,
+.c-yellow .eventActions button,
+.c-red .eventActions button,
+.c-purple .eventActions button,
+.c-cyan .eventActions button,
+.c-pink .eventActions button,
+.c-teal .eventActions button,
+.c-amber .eventActions button,
+.c-lime .eventActions button,
+.c-indigo .eventActions button {
+    color: inherit;
+}

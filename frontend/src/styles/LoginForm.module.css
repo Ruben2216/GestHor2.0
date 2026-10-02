@@ -1,0 +1,523 @@
+/* Animaciones personalizadas */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(10px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.loginBackground {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(-45deg, #1a5fb4, #298ce7, #3598db, #2980b9);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efectos decorativos de fondo */
+.loginBackground::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -250px;
+  left: -150px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.loginBackground::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  bottom: -200px;
+  right: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.loginContent {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.infoSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-left: 7vw;
+  padding-right: 3vw;
+  color: #fff;
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.systemTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 0.3em;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(to right, #fff, #e3f2fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.3);
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.systemSubtitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.5em;
+  font-weight: 300;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  animation: slideInLeft 0.9s ease-out;
+}
+
+.infoText {
+  font-size: 1.1rem;
+  max-width: 450px;
+  line-height: 1.6;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+  animation: slideInLeft 1s ease-out;
+}
+
+.loginCardWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100vh;
+  animation: slideInRight 0.8s ease-out;
+}
+
+.loginCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  padding: 40px 36px;
+  min-width: 420px;
+  max-width: 450px;
+  width: 100%;
+  margin-right: 7vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+
+.loginCard:hover {
+  box-shadow: 0 0 15px gray;
+}
+
+.cardTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.1em;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #1a5fb4, #298ce7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cardSubtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 1.2em;
+  font-weight: 400;
+}
+
+.loginForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formGroup {
+  width: 100%;
+  text-align: left;
+  position: relative;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  box-sizing: border-box;
+  font-size: 15px;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #e0e0e0, #f0f0f0) border-box;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.inputField:focus {
+  border: 2px solid transparent;
+  outline: none;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #298ce7, #1a5fb4) border-box;
+  box-shadow: 0 8px 16px rgba(41, 140, 231, 0.2);
+  transform: translateY(-2px);
+}
+
+.inputField::placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+.loginButton {
+  background: linear-gradient(135deg, #298ce7 0%, #1a5fb4 100%);
+  color: white;
+  padding: 14px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 8px 20px rgba(41, 140, 231, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.loginButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.loginButton:hover::before {
+  left: 100%;
+}
+
+.loginButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(41, 140, 231, 0.5);
+}
+
+.loginButton:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(41, 140, 231, 0.4);
+}
+
+.forgotPasswordLink {
+  text-align: right;
+  margin-bottom: 4px;
+  margin-top: -6px;
+}
+
+.forgotPasswordLink a {
+  color: #298ce7;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.forgotPasswordLink a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, #298ce7, #1a5fb4);
+  transition: width 0.3s ease;
+}
+
+.forgotPasswordLink a:hover::after {
+  width: 100%;
+}
+
+.forgotPasswordLink a:hover {
+  color: #1a5fb4;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 14px 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d0d0d0, transparent);
+}
+
+.divider:not(:empty)::before {
+  margin-right: 1em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: 1em;
+}
+
+.googleButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  color: #333;
+  padding: 13px 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.googleButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 12px;
+  background: rgba(41, 140, 231, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.googleButton:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.googleButton:hover {
+  background: #fff;
+  border-color: #298ce7;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.googleButton:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.googleButton img {
+  position: relative;
+  z-index: 1;
+}
+
+.googleButton span {
+  position: relative;
+  z-index: 1;
+}
+
+.errorMsg {
+  background: linear-gradient(135deg, #ffe5e5, #ffcccc);
+  color: #d32f2f;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 2px solid #ffb3b3;
+  font-size: 14px;
+  text-align: center;
+  margin: 8px 0;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 1024px) {
+  .loginContent {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .infoSection {
+    padding: 3rem 4vw;
+    text-align: center;
+    align-items: center;
+  }
+
+  .systemTitle {
+    font-size: 2.6rem;
+  }
+
+  .loginCard {
+    margin: 2rem 2vw;
+    min-width: 320px;
+    max-width: 520px;
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .cardTitle {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginBackground {
+    background: linear-gradient(-45deg, #1a5fb4, #298ce7);
+    background-size: 200% 200%;
+  }
+
+  .loginContent {
+    height: auto;
+    padding: 2rem 1rem;
+    flex-direction: column-reverse;
+  }
+
+  .infoSection {
+    padding: 1.2rem 2rem;
+  }
+
+  .systemTitle {
+    font-size: 1.6rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .systemSubtitle {
+    font-size: 1rem;
+  }
+
+  .infoText {
+    display: none; /* Ocultar texto largo en pantallas muy pequeñas */
+  }
+
+  .loginCard {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0 1rem 1.5rem 1rem;
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .cardTitle {
+    font-size: 1.4rem;
+  }
+
+  .cardSubtitle {
+    font-size: 0.9rem;
+  }
+
+  .inputField, .googleButton, .loginButton {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .forgotPasswordLink {
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .forgotPasswordLink a {
+    display: inline-block;
+  }
+
+  .divider {
+    font-size: 0.85rem;
+  }
+
+  .googleButton svg {
+    width: 20px;
+    height: 20px;
+  }
+}

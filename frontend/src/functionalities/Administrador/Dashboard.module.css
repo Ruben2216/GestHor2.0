@@ -1,0 +1,38 @@
+.dashboard__stat-card__label{color:var(--muted);font-size:14px}
+.dashboard__stat-card__value{font-size:28px;font-weight:800;margin-top:6px}
+.dashboard__muted{color:var(--muted)}
+
+.dashboard__card{margin-top:16px}
+
+.dashboard__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.dashboard__header__title{font-weight:700;font-size:16px;color:var(--text)}
+
+.dashboard__filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.dashboard__search{position:relative}
+.dashboard__search-input{min-width:260px}
+.dashboard__suggestions{position:absolute;top:105%;left:0;right:0;background:white;border:1px solid #e5e7eb;border-radius:8px;z-index:10;max-height:260px;overflow-y:auto;box-shadow:0 4px 18px rgba(0,0,0,0.08)}
+.dashboard__suggestion-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f3f4f6}
+.dashboard__no-matches{padding:8px;color:#6b7280}
+
+.dashboard__loading{margin-top:8px}
+.dashboard__error{color:tomato;margin-top:8px}
+.dashboard__info{font-size:12px;color:var(--muted)}
+
+.dashboard__salon-info{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:8px}
+.dashboard__salon-info__title{font-weight:700}
+.dashboard__salon-body{margin-top:6px}
+.dashboard__salon-professors{margin-top:8px}
+.dashboard__prof-list{margin-top:6px}
+.dashboard__prof-list-item{display:flex;justify-content:space-between;gap:8px}
+
+.dashboard__table-wrapper{overflow-x:auto;margin-top:8px}
+.dashboard__slot-cell{font-weight:600;background:#f8fafc}
+.dashboard__event{margin-bottom:6px}
+.dashboard__strong-cell{font-weight:600}
+.dashboard__small-mb{margin-bottom:6px}
+
+.dashboard__page-header{margin-bottom:16px}
+.dashboard__main-title{margin:0}
+.dashboard__main-subtitle{margin-top:4px}
+.dashboard__stats{margin-bottom:16px}
