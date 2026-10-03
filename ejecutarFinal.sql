@@ -2031,6 +2031,157 @@ ALTER TABLE ONLY public.salones
     ADD CONSTRAINT salones_edificio_id_fkey FOREIGN KEY (edificio_id) REFERENCES public.edificios(edificio_id);
 
 
+-- ============================================================
+-- MÓDULO 1: AUTENTICACIÓN - Tablas y columnas adicionales
+-- ============================================================
+
+-- 1. Extender tabla roles para RBAC completo
+ALTER TABLE public.roles
+    ADD COLUMN IF NOT EXISTS descripcion TEXT,
+    ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS fecha_creacion TIMESTAMPTZ DEFAULT NOW();
+
+-- 2. Tabla de permisos
+CREATE TABLE IF NOT EXISTS public.permisos (
+    permiso_id SERIAL PRIMARY KEY,
+    clave VARCHAR(100) UNIQUE NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+ALTER TABLE public.permisos OWNER TO postgres;
+
+-- 3. Relación N:M roles - permisos
+CREATE TABLE IF NOT EXISTS public.rol_permisos (
+    rol_id INT NOT NULL REFERENCES public.roles(rol_id) ON DELETE CASCADE,
+    permiso_id INT NOT NULL REFERENCES public.permisos(permiso_id) ON DELETE CASCADE,
+    PRIMARY KEY (rol_id, permiso_id)
+);
+
+ALTER TABLE public.rol_permisos OWNER TO postgres;
+
+-- 4. Extender tabla usuarios para autenticación robusta
+ALTER TABLE public.usuarios
+    ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS nombre VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS fecha_actualizacion TIMESTAMPTZ DEFAULT NOW(),
+    ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMPTZ NULL,
+    ADD COLUMN IF NOT EXISTS email_verificado BOOLEAN DEFAULT FALSE;
+
+-- Migrar password existente a password_hash si está vacío
+UPDATE public.usuarios
+SET password_hash = password
+WHERE password_hash IS NULL AND password IS NOT NULL;
+
+-- 5. Tabla de refresh tokens (JWT)
+CREATE TABLE IF NOT EXISTS public.refresh_tokens (
+    refresh_token_id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL REFERENCES public.usuarios(usuario_id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL UNIQUE,
+    jti UUID NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ NULL,
+    replaced_by_token_id INT NULL REFERENCES public.refresh_tokens(refresh_token_id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    user_agent TEXT,
+    ip_origen TEXT
+);
+
+ALTER TABLE public.refresh_tokens OWNER TO postgres;
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_usuario ON public.refresh_tokens(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_jti ON public.refresh_tokens(jti);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires ON public.refresh_tokens(expires_at);
+
+-- 6. Tabla de tokens de recuperación de contraseña
+CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
+    reset_token_id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL REFERENCES public.usuarios(usuario_id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used_at TIMESTAMPTZ NULL,
+    revoked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
+
+CREATE INDEX IF NOT EXISTS idx_pwd_reset_usuario ON public.password_reset_tokens(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_pwd_reset_expires ON public.password_reset_tokens(expires_at);
+
+-- 7. Tabla de sesiones de usuario (auditoría y tracking)
+CREATE TABLE IF NOT EXISTS public.user_sessions (
+    session_id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL REFERENCES public.usuarios(usuario_id) ON DELETE CASCADE,
+    access_jti UUID NOT NULL,
+    refresh_jti UUID NOT NULL,
+    ip_origen TEXT,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    revoked_at TIMESTAMPTZ NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    status VARCHAR(20) DEFAULT 'active'
+);
+
+ALTER TABLE public.user_sessions OWNER TO postgres;
+
+CREATE INDEX IF NOT EXISTS idx_sessions_usuario ON public.user_sessions(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_status ON public.user_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON public.user_sessions(expires_at);
+
+-- ============================================================
+-- Datos semilla para roles y permisos básicos
+-- ============================================================
+
+-- Permisos base del sistema
+INSERT INTO public.permisos (clave, nombre, descripcion) VALUES
+    ('usuarios:leer', 'Leer usuarios', 'Permite listar y ver detalles de usuarios'),
+    ('usuarios:crear', 'Crear usuarios', 'Permite crear nuevos usuarios'),
+    ('usuarios:editar', 'Editar usuarios', 'Permite modificar usuarios existentes'),
+    ('usuarios:eliminar', 'Eliminar usuarios', 'Permite eliminar usuarios'),
+    ('roles:leer', 'Leer roles', 'Permite listar y ver roles'),
+    ('roles:crear', 'Crear roles', 'Permite crear nuevos roles'),
+    ('roles:editar', 'Editar roles', 'Permite modificar roles existentes'),
+    ('roles:eliminar', 'Eliminar roles', 'Permite eliminar roles'),
+    ('horarios:leer', 'Leer horarios', 'Permite ver horarios'),
+    ('horarios:crear', 'Crear horarios', 'Permite crear horarios'),
+    ('horarios:editar', 'Editar horarios', 'Permite modificar horarios'),
+    ('horarios:eliminar', 'Eliminar horarios', 'Permite eliminar horarios'),
+    ('materias:leer', 'Leer materias', 'Permite ver catálogo de materias'),
+    ('materias:crear', 'Crear materias', 'Permite crear materias'),
+    ('materias:editar', 'Editar materias', 'Permite modificar materias'),
+    ('materias:eliminar', 'Eliminar materias', 'Permite eliminar materias'),
+    ('profesores:leer', 'Leer profesores', 'Permite ver profesores'),
+    ('profesores:crear', 'Crear profesores', 'Permite crear profesores'),
+    ('profesores:editar', 'Editar profesores', 'Permite modificar profesores'),
+    ('profesores:eliminar', 'Eliminar profesores', 'Permite eliminar profesores'),
+    ('carreras:leer', 'Leer carreras', 'Permite ver carreras'),
+    ('carreras:crear', 'Crear carreras', 'Permite crear carreras'),
+    ('carreras:editar', 'Editar carreras', 'Permite modificar carreras'),
+    ('carreras:eliminar', 'Eliminar carreras', 'Permite eliminar carreras'),
+    ('auditoria:leer', 'Leer auditoría', 'Permite ver logs de auditoría'),
+    ('reportes:leer', 'Leer reportes', 'Permite generar y ver reportes')
+ON CONFLICT (clave) DO NOTHING;
+
+-- Asignar todos los permisos al rol administrador
+INSERT INTO public.rol_permisos (rol_id, permiso_id)
+SELECT r.rol_id, p.permiso_id
+FROM public.roles r
+CROSS JOIN public.permisos p
+WHERE r.nombre_rol = 'administrador'
+ON CONFLICT DO NOTHING;
+
+-- Asignar permisos básicos al rol profesor
+INSERT INTO public.rol_permisos (rol_id, permiso_id)
+SELECT r.rol_id, p.permiso_id
+FROM public.roles r
+CROSS JOIN public.permisos p
+WHERE r.nombre_rol = 'profesor'
+  AND p.clave IN ('horarios:leer', 'materias:leer', 'profesores:leer', 'carreras:leer', 'reportes:leer')
+ON CONFLICT DO NOTHING;
+
 -- Completed on 2025-10-26 17:59:27 CST
 
 --

@@ -1,0 +1,73 @@
+export const AUTH_CONSTANTS = {
+  JWT: {
+    ACCESS_EXPIRES_IN: '15m',
+    REFRESH_EXPIRES_IN: '7d',
+    ACCESS_TOKEN_TYPE: 'access',
+    REFRESH_TOKEN_TYPE: 'refresh',
+  },
+  PASSWORD: {
+    MIN_LENGTH: 8,
+    BCRYPT_ROUNDS: 12,
+  },
+  RESET_TOKEN: {
+    EXPIRES_IN_HOURS: 1,
+    TOKEN_BYTES: 32,
+  },
+  REFRESH_TOKEN: {
+    ROTATION_ENABLED: true,
+    REUSE_DETECTION: true,
+  },
+  SESSION: {
+    STATUS_ACTIVE: 'active',
+    STATUS_REVOKED: 'revoked',
+    STATUS_EXPIRED: 'expired',
+  },
+  ERROR_CODES: {
+    INVALID_INPUT: 'INVALID_INPUT',
+    INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+    TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+    INVALID_TOKEN: 'INVALID_TOKEN',
+    FORBIDDEN: 'FORBIDDEN',
+    USER_NOT_FOUND: 'USER_NOT_FOUND',
+    DUPLICATE_EMAIL: 'DUPLICATE_EMAIL',
+    TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+    TOKEN_REUSED: 'TOKEN_REUSED',
+    PASSWORD_SAME_AS_CURRENT: 'PASSWORD_SAME_AS_CURRENT',
+    RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
+    RESET_TOKEN_EXPIRED: 'RESET_TOKEN_EXPIRED',
+    RESET_TOKEN_USED: 'RESET_TOKEN_USED',
+  },
+  HTTP_STATUS: {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    CONFLICT: 409,
+    TOO_MANY_REQUESTS: 429,
+    INTERNAL_SERVER_ERROR: 500,
+  },
+  ROLES: {
+    ADMIN: 'administrador',
+    TEACHER: 'docente',
+    STUDENT: 'estudiante',
+  },
+};
+
+export const RESPONSE_MESSAGES = {
+  LOGIN_SUCCESS: 'Inicio de sesión exitoso',
+  LOGOUT_SUCCESS: 'Sesión cerrada correctamente',
+  REFRESH_SUCCESS: 'Token renovado correctamente',
+  PASSWORD_CHANGED: 'Contraseña actualizada correctamente',
+  RESET_EMAIL_SENT: 'Si el correo existe, se enviará un enlace de recuperación',
+  PASSWORD_RESET: 'Contraseña restablecida correctamente',
+  UNAUTHORIZED: 'No autorizado',
+  FORBIDDEN: 'No tiene permisos para acceder a este recurso',
+  INVALID_CREDENTIALS: 'Credenciales inválidas',
+  TOKEN_EXPIRED: 'Token expirado. Por favor inicie sesión nuevamente',
+  INVALID_TOKEN: 'Token inválido',
+  USER_NOT_FOUND: 'Usuario no encontrado',
+  VALIDATION_ERROR: 'Datos de entrada inválidos',
+  INTERNAL_ERROR: 'Error interno del servidor',
+};

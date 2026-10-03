@@ -1,66 +1,41 @@
-import jwt from "jsonwebtoken";
-import { findUserByEmail } from "../models/userModel.js";
+import { env } from "../config/env.js";
+import * as authService from "../services/authService.js";
 
 const googleAuthCallback = async (req, res) => {
     try {
-        // El usuario viene de passport después de autenticarse con Google
         const email = req.user?.email;
 
         if (!email) {
-            return res.redirect(
-                `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=no_email`
-            );
+            return res.redirect(`${env.frontend.url}/login?error=no_email`);
         }
 
-        // Buscar usuario por email en la base de datos
-        const user = await findUserByEmail(email);
-        
-        if (!user) {
-            // Usuario no encontrado en la base de datos
-            return res.redirect(
-                `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=user_not_found`
-            );
-        }
+        const ipOrigen = req.ip || req.connection?.remoteAddress || 'unknown';
+        const userAgent = req.headers['user-agent'] || 'unknown';
 
-        // Generar JWT con expiración de 15 minutos
-        const token = jwt.sign(
-            { 
-                sub: user.usuario_id,
-                email: user.email,
-                rol: user.nombre_rol
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
-        );
+        const result = await authService.socialLogin(email, ipOrigen, userAgent);
 
-        // Determinar redirección según rol
-        const redirectTo = user.nombre_rol === "administrador"
+        const redirectTo = result.usuario.rol === "administrador"
             ? "/admin/admin-dashboard"
             : "/profesor/mi-horario";
 
-        // Redirigir al frontend con el token y la información del usuario
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         const userData = encodeURIComponent(JSON.stringify({
-            id: user.usuario_id,
-            email: user.email,
-            rol: user.nombre_rol
+            id: result.usuario.id,
+            email: result.usuario.email,
+            rol: result.usuario.rol,
+            nombre: result.usuario.nombre,
         }));
 
         res.redirect(
-            `${frontendUrl}/auth/callback?token=${token}&user=${userData}&redirectTo=${redirectTo}`
+            `${env.frontend.url}/auth/callback?token=${result.accessToken}&refreshToken=${result.refreshToken}&user=${userData}&redirectTo=${redirectTo}`
         );
     } catch (error) {
         console.error("Error en googleAuthCallback:", error);
-        res.redirect(
-            `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=server_error`
-        );
+        res.redirect(`${env.frontend.url}/login?error=server_error`);
     }
 };
 
 const googleAuthFailure = (_req, res) => {
-    res.redirect(
-        `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`
-    );
+    res.redirect(`${env.frontend.url}/login?error=auth_failed`);
 };
 
 export { googleAuthCallback, googleAuthFailure };

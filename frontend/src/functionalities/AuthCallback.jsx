@@ -9,6 +9,7 @@ function AuthCallback() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const refreshToken = searchParams.get("refreshToken");
     const userStr = searchParams.get("user");
     const redirectTo = searchParams.get("redirectTo");
     const error = searchParams.get("error");
@@ -33,21 +34,25 @@ function AuthCallback() {
           errorMessage = "Error desconocido";
       }
       
-  notify({ type: 'error', message: errorMessage });
+      notify({ type: 'error', message: errorMessage });
       navigate("/login");
       return;
     }
 
     if (token && userStr && redirectTo) {
-      // Guardar token y usuario en localStorage
-      localStorage.setItem("token", token);
+      // Guardar tokens y usuario en localStorage
+      localStorage.setItem("accessToken", token);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
       
       try {
         const user = JSON.parse(decodeURIComponent(userStr));
         localStorage.setItem("user", JSON.stringify({
           usuario_id: user.id,
           email: user.email,
-          rol: user.rol
+          rol: user.rol,
+          nombre: user.nombre
         }));
         
         // Redirigir según el rol

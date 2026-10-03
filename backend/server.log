@@ -1,0 +1,25 @@
+[dotenv@17.2.3] injecting env (31) from .env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+Test server on 3003
+Ready for requests
+=== LOGIN REQUEST ===
+req.body: {
+  "correo": "test@test.com",
+  "contrase├▒a": "password123"
+}
+Content-Type: application/json
+Extracted correo: test@test.com
+Extracted contrase├▒a: ***
+Validation passed
+=== LOGIN ERROR ===
+Error name: TypeError
+Error message: Cannot read properties of undefined (reading 'LOGIN_SUCCESS')
+Error code: undefined
+Error statusCode: undefined
+Error details: undefined
+Error stack: TypeError: Cannot read properties of undefined (reading 'LOGIN_SUCCESS')
+    at login (file:///C:/Users/Ruben%20Clemente/Desktop/GestHor7M/GestHor/backend/src/controllers/authController.js:29:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Error: TypeError: Cannot read properties of undefined (reading 'LOGIN_SUCCESS')
+    at login (file:///C:/Users/Ruben%20Clemente/Desktop/GestHor7M/GestHor/backend/src/controllers/authController.js:29:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

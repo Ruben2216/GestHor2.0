@@ -1,76 +1,93 @@
-import jwt from "jsonwebtoken";
+import * as tokenService from '../services/tokenService.js';
+import * as sessionService from '../services/sessionService.js';
+import { sendError } from '../utils/response.js';
+import { AUTH_CONSTANTS } from '../constants/auth.constants.js';
 
-/**
- * Middleware para verificar JWT en las peticiones
- * Extrae el token del header Authorization: Bearer <token>
- * Si es válido, adjunta req.user con los datos del payload
- */
-export const auth = (req, res, next) => {
-    try {
-        // Obtener token del header Authorization
-        const authHeader = req.headers.authorization;
-        
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "Token no proporcionado" 
-            });
-        }
+export const auth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-        // Extraer token después de "Bearer "
-        const token = authHeader.substring(7);
-
-        // Verificar y decodificar token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Adjuntar datos del usuario al request
-        req.user = {
-            id: decoded.sub,
-            email: decoded.email,
-            rol: decoded.rol
-        };
-
-        next();
-    } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "Token expirado. Por favor inicie sesión nuevamente" 
-            });
-        }
-        
-        if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "Token inválido" 
-            });
-        }
-
-        console.error("Error en middleware auth:", error);
-        return res.status(500).json({ 
-            ok: false, 
-            message: "Error al validar token" 
-        });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return sendError(res, 'Token no proporcionado', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
     }
+
+    const token = authHeader.substring(7);
+
+    const decoded = tokenService.verifyAccessToken(token);
+
+    if (!tokenService.isAccessToken(decoded)) {
+      return sendError(res, 'Tipo de token inválido', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    const session = await sessionService.findSessionByAccessJti(decoded.jti);
+
+    if (!session || session.status !== 'active') {
+      return sendError(res, 'Sesión inválida o revocada', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    req.user = {
+      id: decoded.sub,
+      email: decoded.email,
+      rol: decoded.rol,
+      jti: decoded.jti,
+      type: decoded.type,
+    };
+
+    req.session = {
+      sessionId: session.session_id,
+      accessJti: session.access_jti,
+      refreshJti: session.refresh_jti,
+      ipOrigen: session.ip_origen,
+      userAgent: session.user_agent,
+    };
+
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError' || error.message.includes('expirado')) {
+      return sendError(res, 'Token expirado. Por favor inicie sesión nuevamente', AUTH_CONSTANTS.ERROR_CODES.TOKEN_EXPIRED, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    if (error.name === 'JsonWebTokenError' || error.message.includes('inválido')) {
+      return sendError(res, 'Token inválido', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    console.error('Error en middleware auth:', error);
+    return sendError(res, 'Error al validar token', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.INTERNAL_SERVER_ERROR);
+  }
 };
 
-
 export const requireRole = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "No autenticado" 
-            });
-        }
+  return (req, res, next) => {
+    if (!req.user) {
+      return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
 
-        if (!roles.includes(req.user.rol)) {
-            return res.status(403).json({ 
-                ok: false, 
-                message: "No tiene permisos para acceder a este recurso" 
-            });
-        }
+    const userRole = req.user.rol;
 
-        next();
-    };
+    if (!roles.includes(userRole)) {
+      return sendError(res, 'No tiene permisos para acceder a este recurso', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
+    }
+
+    next();
+  };
+};
+
+export const requirePermission = (...permissions) => {
+  return async (req, res, next) => {
+    if (!req.user) {
+      return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    if (!req.user.permissions) {
+      return sendError(res, 'Permisos no disponibles', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
+    }
+
+    const hasPermission = permissions.some(p => req.user.permissions.includes(p));
+
+    if (!hasPermission) {
+      return sendError(res, 'No tiene permisos para acceder a este recurso', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
+    }
+
+    next();
+  };
 };

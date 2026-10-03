@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 import styles from "../styles/LoginForm.module.css";
 import PasswordInput from "../components/ui/PasswordInput";
 import usePageTitle from "../hooks/usePageTitle";
+
+const API_URL = 'http://localhost:3000/api';
 
 
 function LoginForm() {
@@ -58,31 +61,32 @@ function LoginForm() {
 
     try {
       // enviar datos al backend
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // se manda tambien tipoUsuario para validarlo en el backend
-        body: JSON.stringify({ correo, contraseña, tipoUsuario }),
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        correo,
+        contraseña,
+        tipoUsuario,
       });
 
-      const result = await response.json();
+      const result = response.data;
 
       // si hay error (credenciales o rol incorrecto)
-      if (!response.ok || !result.ok) {
+      if (!result.ok) {
         setError(result?.message || "Error en el login");
         setCargando(false);
         return;
       }
 
       // si todo esta bien, redirige según el rol
-      const rol = result?.usuario?.rol;
+      const rol = result?.data?.usuario?.rol;
 
-      // Guardar token y usuario en localStorage
-      localStorage.setItem("token", result.token);
+      // Guardar tokens y usuario en localStorage
+      localStorage.setItem("accessToken", result.data.accessToken);
+      localStorage.setItem("refreshToken", result.data.refreshToken);
       localStorage.setItem("user", JSON.stringify({
-        usuario_id: result.usuario.id,
-        email: result.usuario.email,
-        rol: result.usuario.rol
+        usuario_id: result.data.usuario.id,
+        email: result.data.usuario.email,
+        rol: result.data.usuario.rol,
+        nombre: result.data.usuario.nombre
       }));
 
       if (rol === "administrador") {
@@ -95,7 +99,8 @@ function LoginForm() {
 
     } catch (err) {
       console.error("Error al conectar con el servidor:", err);
-      setError("No se pudo conectar con el servidor.");
+      const mensaje = err.response?.data?.message || "No se pudo conectar con el servidor.";
+      setError(mensaje);
     } finally {
       setCargando(false);
     }

@@ -1,73 +1,90 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { findUserByEmail } from "../models/userModel.js";
+import * as authService from '../services/authService.js';
+import { validateLogin } from '../validators/authValidator.js';
+import { sendSuccess, sendError, handleError } from '../utils/response.js';
+import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
 
-const login = async (req, res) => {
-    try {
-        const { correo, contraseña } = req.body;
+export async function login(req, res) {
+  try {
+    console.log('=== LOGIN REQUEST ===');
+    console.log('req.body:', JSON.stringify(req.body, null, 2));
+    console.log('Content-Type:', req.headers['content-type']);
+    
+    const correo = req.body.correo || req.body.email;
+    const contraseña = req.body.contraseña || req.body.password;
+    console.log('Extracted correo:', correo);
+    console.log('Extracted contraseña:', contraseña ? '***' : 'MISSING');
+    
+    const { email, password } = validateLogin(correo, contraseña);
+    console.log('Validation passed');
 
-        // Validar que vengan ambos campos
-        if (!correo || !contraseña) {
-            return res.status(400).json({ 
-                ok: false, 
-                message: "Falta correo o contraseña" 
-            });
-        }
+    const ipOrigen = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
-        // Buscar usuario por email
-        const user = await findUserByEmail(correo);
-        
-        if (!user) {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "Credenciales inválidas" 
-            });
-        }
+    const result = await authService.login(email, password, ipOrigen, userAgent);
 
-        // Comparar contraseña/token con el hash almacenado
-        const passwordMatch = await bcrypt.compare(contraseña, user.password);
-        
-        if (!passwordMatch) {
-            return res.status(401).json({ 
-                ok: false, 
-                message: "Credenciales inválidas" 
-            });
-        }
-
-        // Generar JWT con expiración de 15 minutos
-        const token = jwt.sign(
-            { 
-                sub: user.usuario_id,
-                email: user.email,
-                rol: user.nombre_rol
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
-        );
-
-        // Determinar redirección según rol
-        const redirectTo = user.nombre_rol === "administrador"
-            ? "/admin/admin-dashboard"
-            : "/profesor/mi-horario";
-
-        // Devolver token y datos del usuario (sin password)
-        return res.json({
-            ok: true,
-            token,
-            usuario: { 
-                id: user.usuario_id, 
-                email: user.email, 
-                rol: user.nombre_rol 
-            },
-            redirectTo,
-        });
-    } catch (error) {
-        console.error("Error en login:", error);
-        res.status(500).json({ 
-            ok: false, 
-            message: "Error en login" 
-        });
+    return sendSuccess(res, {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      usuario: result.usuario,
+    }, RESPONSE_MESSAGES.LOGIN_SUCCESS);
+  } catch (error) {
+    console.error('=== LOGIN ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error statusCode:', error.statusCode);
+    console.error('Error details:', error.details);
+    console.error('Error stack:', error.stack);
+    
+    // Return detailed error for debugging
+    if (process.env.NODE_ENV !== 'production') {
+      return res.status(500).json({
+        ok: false,
+        message: error.message,
+        code: error.code || 'INTERNAL_ERROR',
+        stack: error.stack,
+        details: error.details
+      });
     }
-};
+    return handleError(res, error, 'Error en login');
+  }
+}
 
-export { login };
+export async function logout(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
+    let refreshToken = null;
+
+    if (req.body.refreshToken) {
+      refreshToken = req.body.refreshToken;
+    } else if (authHeader && authHeader.startsWith('Bearer ')) {
+      refreshToken = authHeader.substring(7);
+    }
+
+    const userId = req.user?.id;
+    const ipOrigen = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    const result = await authService.logout(userId, refreshToken, ipOrigen, userAgent);
+
+    return sendSuccess(res, result, RESPONSE_MESSAGES.LOGOUT_SUCCESS);
+  } catch (error) {
+    return handleError(res, error, 'Error al cerrar sesión');
+  }
+}
+
+export async function getMe(req, res) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    const result = await authService.getMe(userId);
+
+    return sendSuccess(res, result, 'Perfil obtenido correctamente');
+  } catch (error) {
+    return handleError(res, error, 'Error al obtener perfil');
+  }
+}
