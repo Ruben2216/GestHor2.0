@@ -3,72 +3,43 @@
 -- ============================================================================
 -- Ejecutar en base de datos de DESARROLLO únicamente
 -- NO usar en producción
+-- Requiere: ejecutarFinal.sql, 001_auth_module.sql y 002_roles_permisos.sql
 -- ============================================================================
 
 -- Contraseña para todos los usuarios de prueba: test1234
 -- Hash bcrypt (12 rounds): $2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC
+-- La columna legacy "password" es NOT NULL en ejecutarFinal.sql, por eso se llena con el mismo hash.
 
--- Verificar/obtener rol_id de administrador y profesor
--- INSERT solo si no existe (evita duplicados)
-
--- Usuario de prueba: Administrador
-INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
-VALUES (
-    'test.admin@unach.mx',
-    '$2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC',  -- test1234
-    'Test Admin',
-    (SELECT rol_id FROM roles WHERE nombre_rol = 'administrador' LIMIT 1),
-    TRUE,
-    NOW(),
-    TRUE
-)
+INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
+SELECT v.email, h.hash, h.hash, v.nombre, r.rol_id, TRUE, NOW(), TRUE
+FROM (VALUES
+    ('test.admin@unach.mx',      'Test Admin',      'administrador'),
+    ('test.editor@unach.mx',     'Test Editor',     'docente'),
+    ('test.profe@unach.mx',      'Test Profesor',   'profesor'),
+    ('test.estudiante@unach.mx', 'Test Estudiante', 'estudiante')
+) AS v(email, nombre, nombre_rol)
+CROSS JOIN (SELECT '$2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC'::varchar) AS h(hash)
+JOIN roles r ON r.nombre_rol = v.nombre_rol
 ON CONFLICT (email) DO UPDATE SET
+    password = EXCLUDED.password,
     password_hash = EXCLUDED.password_hash,
     nombre = EXCLUDED.nombre,
     rol_id = EXCLUDED.rol_id,
     activo = EXCLUDED.activo,
     email_verificado = EXCLUDED.email_verificado;
 
--- Usuario de prueba: Profesor
-INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
-VALUES (
-    'test.profe@unach.mx',
-    '$2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC',  -- test1234
-    'Test Profesor',
-    (SELECT rol_id FROM roles WHERE nombre_rol = 'profesor' LIMIT 1),
-    TRUE,
-    NOW(),
-    TRUE
-)
-ON CONFLICT (email) DO UPDATE SET
-    password_hash = EXCLUDED.password_hash,
-    nombre = EXCLUDED.nombre,
-    rol_id = EXCLUDED.rol_id,
-    activo = EXCLUDED.activo,
-    email_verificado = EXCLUDED.email_verificado;
-
--- Usuario de prueba: Estudiante (si existe rol estudiante)
-INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
-VALUES (
-    'test.estudiante@unach.mx',
-    '$2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC',  -- test1234
-    'Test Estudiante',
-    (SELECT rol_id FROM roles WHERE nombre_rol = 'estudiante' LIMIT 1),
-    TRUE,
-    NOW(),
-    TRUE
-)
-ON CONFLICT (email) DO UPDATE SET
-    password_hash = EXCLUDED.password_hash,
-    nombre = EXCLUDED.nombre,
-    rol_id = EXCLUDED.rol_id,
-    activo = EXCLUDED.activo,
-    email_verificado = EXCLUDED.email_verificado;
+-- El profesor de prueba necesita su registro en "profesores" (profesor_id = usuario_id)
+INSERT INTO profesores (profesor_id, nombres, apellidos, matricula, email)
+SELECT usuario_id, 'Test', 'Profesor', 'TEST-0001', email
+FROM usuarios
+WHERE email = 'test.profe@unach.mx'
+ON CONFLICT DO NOTHING;
 
 -- ============================================================================
 -- CREDENCIALES DE PRUEBA
 -- ============================================================================
 -- Email: test.admin@unach.mx        | Password: test1234 | Rol: administrador
+-- Email: test.editor@unach.mx       | Password: test1234 | Rol: docente (editor)
 -- Email: test.profe@unach.mx        | Password: test1234 | Rol: profesor
--- Email: test.estudiante@unach.mx   | Password: test1234 | Rol: estudiante (si existe)
+-- Email: test.estudiante@unach.mx   | Password: test1234 | Rol: estudiante (alumno)
 -- ============================================================================

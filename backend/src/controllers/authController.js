@@ -2,20 +2,15 @@ import * as authService from '../services/authService.js';
 import { validateLogin } from '../validators/authValidator.js';
 import { sendSuccess, sendError, handleError } from '../utils/response.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
+import { loadPermissions } from '../middlewares/auth.js';
+import { AppError } from '../utils/errors.js';
 
 export async function login(req, res) {
   try {
-    console.log('=== LOGIN REQUEST ===');
-    console.log('req.body:', JSON.stringify(req.body, null, 2));
-    console.log('Content-Type:', req.headers['content-type']);
-    
     const correo = req.body.correo || req.body.email;
     const contraseña = req.body.contraseña || req.body.password;
-    console.log('Extracted correo:', correo);
-    console.log('Extracted contraseña:', contraseña ? '***' : 'MISSING');
-    
+
     const { email, password } = validateLogin(correo, contraseña);
-    console.log('Validation passed');
 
     const ipOrigen = req.ip || req.connection?.remoteAddress || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
@@ -28,25 +23,14 @@ export async function login(req, res) {
       usuario: result.usuario,
     }, RESPONSE_MESSAGES.LOGIN_SUCCESS);
   } catch (error) {
-    console.error('=== LOGIN ERROR ===');
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error statusCode:', error.statusCode);
-    console.error('Error details:', error.details);
-    console.error('Error stack:', error.stack);
-    
-    // Return detailed error for debugging
-    if (process.env.NODE_ENV !== 'production') {
-      return res.status(500).json({
-        ok: false,
-        message: error.message,
-        code: error.code || 'INTERNAL_ERROR',
-        stack: error.stack,
-        details: error.details
-      });
+    // Errores esperados (datos inválidos, credenciales incorrectas): su status real (400/401)
+    if (error instanceof AppError && error.statusCode < 500) {
+      return sendError(res, error.message, error.code, error.statusCode, error.details);
     }
-    return handleError(res, error, 'Error en login');
+
+    // Errores inesperados: el detalle solo se registra en el servidor, nunca se envía al cliente
+    console.error('Error en login:', error);
+    return sendError(res, RESPONSE_MESSAGES.INTERNAL_ERROR, 'INTERNAL_ERROR', AUTH_CONSTANTS.HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -86,5 +70,16 @@ export async function getMe(req, res) {
     return sendSuccess(res, result, 'Perfil obtenido correctamente');
   } catch (error) {
     return handleError(res, error, 'Error al obtener perfil');
+  }
+}
+
+// GET /api/auth/permisos - rol y permisos del usuario autenticado (para el frontend)
+export async function getPermisos(req, res) {
+  try {
+    const permisos = await loadPermissions(req);
+
+    return sendSuccess(res, { rol: req.user.rol, permisos }, 'Permisos obtenidos correctamente');
+  } catch (error) {
+    return handleError(res, error, 'Error al obtener permisos');
   }
 }

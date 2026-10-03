@@ -13,7 +13,7 @@ export async function requestPasswordReset(email) {
   const user = await userRepository.findByEmail(email);
   
   if (!user) {
-    return { success: true, message: AUTH_CONSTANTS.RESPONSE_MESSAGES.RESET_EMAIL_SENT };
+    return { success: true, message: RESPONSE_MESSAGES.RESET_EMAIL_SENT };
   }
 
   const rawToken = generateRandomToken(AUTH_CONSTANTS.RESET_TOKEN.TOKEN_BYTES);

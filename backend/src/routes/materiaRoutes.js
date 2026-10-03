@@ -1,31 +1,32 @@
 import express from "express";
-import { 
-    obtenerMateriasController, 
+import {
+    obtenerMateriasController,
     obtenerMateriasPorCarreraController,
     obtenerMateriasPorCarreraYSemestreController,
-    obtenerMateriaPorIdController, 
-    insertarMateriaController, 
-    actualizarMateriaController, 
+    obtenerMateriaPorIdController,
+    insertarMateriaController,
+    actualizarMateriaController,
     eliminarMateriaController,
     asignarMateriaACarreraController,
     desasignarMateriaDeCarreraController,
     buscarMateriasController
 } from "../controllers/materiaController.js";
+import { authorize } from "../middlewares/auth.js";
 
 const router = express.Router();
 
 // Rutas para catálogo de materias
-router.get('/materias', obtenerMateriasController);
-router.get('/materias/buscar', buscarMateriasController); // ?q=matematicas
-router.get('/materias/carrera/:carreraId', obtenerMateriasPorCarreraController);
-router.get('/materias/carrera/:carreraId/semestre/:semestre', obtenerMateriasPorCarreraYSemestreController);
-router.get('/materias/:id', obtenerMateriaPorIdController);
-router.post('/materias', insertarMateriaController); // Agregar al catálogo
-router.put('/materias/:id', actualizarMateriaController);
-router.delete('/materias/:id', eliminarMateriaController);
+router.get('/materias', authorize('materias:leer'), obtenerMateriasController);
+router.get('/materias/buscar', authorize('materias:leer'), buscarMateriasController); // ?q=matematicas
+router.get('/materias/carrera/:carreraId', authorize('materias:leer'), obtenerMateriasPorCarreraController);
+router.get('/materias/carrera/:carreraId/semestre/:semestre', authorize('materias:leer'), obtenerMateriasPorCarreraYSemestreController);
+router.get('/materias/:id', authorize('materias:leer'), obtenerMateriaPorIdController);
+router.post('/materias', authorize('materias:crear'), insertarMateriaController); // Agregar al catálogo
+router.put('/materias/:id', authorize('materias:editar'), actualizarMateriaController);
+router.delete('/materias/:id', authorize('materias:eliminar'), eliminarMateriaController);
 
-// Rutas para asignar/desasignar materias a carreras
-router.post('/materias/asignar', asignarMateriaACarreraController);
-router.delete('/materias/desasignar/:carreraId/:materiaId/:semestre', desasignarMateriaDeCarreraController);
+// Rutas para asignar/desasignar materias a carreras (plan de estudios)
+router.post('/materias/asignar', authorize('materias:editar'), asignarMateriaACarreraController);
+router.delete('/materias/desasignar/:carreraId/:materiaId/:semestre', authorize('materias:editar'), desasignarMateriaDeCarreraController);
 
 export default router;

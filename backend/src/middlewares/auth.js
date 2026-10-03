@@ -1,5 +1,6 @@
 import * as tokenService from '../services/tokenService.js';
 import * as sessionService from '../services/sessionService.js';
+import * as userRepository from '../repositories/userRepository.js';
 import { sendError } from '../utils/response.js';
 import { AUTH_CONSTANTS } from '../constants/auth.constants.js';
 
@@ -33,7 +34,7 @@ export const auth = async (req, res, next) => {
       type: decoded.type,
     };
 
-    req.session = {
+    req.authSession = {
       sessionId: session.session_id,
       accessJti: session.access_jti,
       refreshJti: session.refresh_jti,
@@ -72,22 +73,53 @@ export const requireRole = (...roles) => {
   };
 };
 
+// Carga los permisos del rol del usuario desde la BD (una vez por request)
+export async function loadPermissions(req) {
+  if (!req.user.permissions) {
+    const rows = await userRepository.getUserPermissions(req.user.id);
+    req.user.permissions = rows.map(p => p.clave);
+  }
+  return req.user.permissions;
+}
+
+// Pasa si el usuario tiene al menos uno de los permisos indicados
 export const requirePermission = (...permissions) => {
   return async (req, res, next) => {
     if (!req.user) {
       return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
     }
 
-    if (!req.user.permissions) {
-      return sendError(res, 'Permisos no disponibles', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
+    try {
+      const userPermissions = await loadPermissions(req);
+
+      if (!permissions.some(p => userPermissions.includes(p))) {
+        return sendError(res, 'No tiene permisos para acceder a este recurso', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
+      }
+
+      next();
+    } catch (error) {
+      console.error('Error en middleware requirePermission:', error);
+      return sendError(res, 'Error al validar permisos', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
-
-    const hasPermission = permissions.some(p => req.user.permissions.includes(p));
-
-    if (!hasPermission) {
-      return sendError(res, 'No tiene permisos para acceder a este recurso', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
-    }
-
-    next();
   };
 };
+
+// Pasa si el usuario es el mismo que el indicado en req.params[param] o tiene al menos uno de los permisos indicados
+export const requireSelfOrPermission = (param, ...permissions) => {
+  const checkPermission = requirePermission(...permissions);
+  return (req, res, next) => {
+    if (!req.user) {
+      return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    if (String(req.params[param]) === String(req.user.id)) {
+      return next();
+    }
+
+    return checkPermission(req, res, next);
+  };
+};
+
+export const authorize = (...permissions) => [auth, requirePermission(...permissions)];
+
+export const authorizeSelfOr = (param, ...permissions) => [auth, requireSelfOrPermission(param, ...permissions)];

@@ -3,16 +3,27 @@ import * as tokenService from './tokenService.js';
 import * as refreshTokenRepository from '../repositories/refreshTokenRepository.js';
 import * as sessionService from './sessionService.js';
 import * as passwordService from './passwordService.js';
-import { hashToken, hashPassword } from '../utils/crypto.js';
-import { UnauthorizedError, ValidationError, TokenReusedError } from '../utils/errors.js';
+import { hashToken, hashPassword, comparePassword } from '../utils/crypto.js';
+import { UnauthorizedError, ValidationError, TokenReusedError, NotFoundError } from '../utils/errors.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
 
-export async function login(email, password, ipOrigen, userAgent) {
-  const user = await userService.findByEmail(email);
+// Hash de una contraseña aleatoria: se compara contra él cuando el correo no existe,
+// para que la respuesta tarde lo mismo y no se pueda saber qué correos están registrados
+const HASH_FICTICIO = '$2b$12$1se3P7gANhL/i7jkod1IZOpfv3yvxJ7pAZe0QYF.xY3phbZaSZUpO';
 
-  const isValid = await userService.isPasswordValid(user, password);
-  if (!isValid) {
-    throw new UnauthorizedError('Credenciales inválidas', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS);
+export async function login(email, password, ipOrigen, userAgent) {
+  let user = null;
+  try {
+    user = await userService.findByEmail(email);
+  } catch (error) {
+    if (!(error instanceof NotFoundError)) throw error;
+  }
+
+  const passwordCorrecta = await comparePassword(password, user?.password_hash || HASH_FICTICIO);
+
+  // Mismo mensaje si el correo no existe o si la contraseña es incorrecta
+  if (!user?.password_hash || !passwordCorrecta) {
+    throw new UnauthorizedError(RESPONSE_MESSAGES.INVALID_CREDENTIALS, AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS);
   }
 
   return createUserSession(user, ipOrigen, userAgent);

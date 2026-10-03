@@ -1,7 +1,7 @@
 import * as authService from '../services/authService.js';
 import { validateChangePassword, validateForgotPassword, validateResetPassword } from '../validators/authValidator.js';
 import { sendSuccess, handleError } from '../utils/response.js';
-import { AUTH_CONSTANTS } from '../constants/auth.constants.js';
+import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
 
 export async function changePassword(req, res) {
   try {
@@ -14,7 +14,7 @@ export async function changePassword(req, res) {
 
     const result = await authService.changePassword(userId, currentPassword, newPassword);
 
-    return sendSuccess(res, result, AUTH_CONSTANTS.RESPONSE_MESSAGES.PASSWORD_CHANGED);
+    return sendSuccess(res, result, RESPONSE_MESSAGES.PASSWORD_CHANGED);
   } catch (error) {
     return handleError(res, error, 'Error al cambiar contraseña');
   }
@@ -38,7 +38,7 @@ export async function resetPassword(req, res) {
 
     const result = await authService.resetPassword(token, newPassword);
 
-    return sendSuccess(res, result, AUTH_CONSTANTS.RESPONSE_MESSAGES.PASSWORD_RESET);
+    return sendSuccess(res, result, RESPONSE_MESSAGES.PASSWORD_RESET);
   } catch (error) {
     return handleError(res, error, 'Error al restablecer contraseña');
   }

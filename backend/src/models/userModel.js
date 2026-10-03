@@ -66,7 +66,8 @@ async function deleteTokenAccess(usuarioId) {
 
 async function actualizarPassword(usuarioId, hashedPassword) {
     try {
-        const sql = `UPDATE usuarios SET password = $1 WHERE usuario_id = $2`;
+        // El login lee password_hash; password (legacy) se mantiene sincronizada
+        const sql = `UPDATE usuarios SET password = $1, password_hash = $1 WHERE usuario_id = $2`;
         await dbConnection.none(sql, [hashedPassword, usuarioId]);
         return true;
     } catch (error) {
