@@ -12,6 +12,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 
 import { MdSchedule } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
+import { cerrarSesion } from "../../services/sessionService";
 import { FaFilePdf, FaFileExcel, FaRegClock } from "react-icons/fa";
 
 const normalize = (s) =>
@@ -197,9 +198,8 @@ export default function MiHorario() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    await cerrarSesion();
     navigate("/login");
   };
 

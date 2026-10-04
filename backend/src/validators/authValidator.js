@@ -14,8 +14,6 @@ export function validateLogin(email, password) {
 
   if (!password || typeof password !== 'string') {
     errors.push('La contraseña es requerida');
-  } else if (password.length < AUTH_CONSTANTS.PASSWORD.MIN_LENGTH) {
-    errors.push(`La contraseña debe tener al menos ${AUTH_CONSTANTS.PASSWORD.MIN_LENGTH} caracteres`);
   }
 
   if (errors.length > 0) {

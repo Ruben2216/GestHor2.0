@@ -1,15 +1,19 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import "../../styles/admin.css";
 
 import { MdDashboard, MdOutlineSchool, MdOutlineSettings, MdOutlineLogout } from "react-icons/md";
 import { FaChalkboardTeacher, FaBookOpen, FaRegBuilding, FaRegClock, FaClipboardList } from "react-icons/fa";
 import { HiOutlineAcademicCap } from "react-icons/hi";
+import { MdManageAccounts, MdHistory } from "react-icons/md";
+import { cerrarSesion } from "../../services/sessionService";
 
 export default function AdminLayout() {
     const navigate = useNavigate();
     const linkClass = ({ isActive }) => `sidebar__link${isActive ? " active" : ""}`;
-    const [cfgOpen, setCfgOpen] = useState(false);
+    const handleLogout = async () => {
+        await cerrarSesion();
+        navigate("/login");
+    };
 
     return (
         <div className="admin">
@@ -66,6 +70,24 @@ export default function AdminLayout() {
                                 Solicitudes
                             </NavLink>
                         </li>
+                        <li className="sidebar__item">
+                            <NavLink to="/admin/roles" className={linkClass}>
+                                <MdManageAccounts size={18} style={{ marginRight: 8 }} aria-hidden="true" />
+                                Roles y permisos
+                            </NavLink>
+                        </li>
+                        <li className="sidebar__item">
+                            <NavLink to="/admin/usuarios" className={linkClass}>
+                                <MdManageAccounts size={18} style={{ marginRight: 8 }} aria-hidden="true" />
+                                Asignar roles
+                            </NavLink>
+                        </li>
+                        <li className="sidebar__item">
+                            <NavLink to="/admin/auditoria" className={linkClass}>
+                                <MdHistory size={18} style={{ marginRight: 8 }} aria-hidden="true" />
+                                Auditoría
+                            </NavLink>
+                        </li>
                     </ul>
                 </nav>
 
@@ -92,7 +114,7 @@ export default function AdminLayout() {
                 <div className="sidebar__footer">
                     <button
                         className="sidebar__logout"
-                        onClick={() => navigate("/")}
+                        onClick={handleLogout}
                         style={{ display: "flex", alignItems: "center", gap: 8 }}
                         title="Cerrar sesión"
                     >

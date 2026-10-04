@@ -16,6 +16,11 @@ export async function login(req, res) {
     const userAgent = req.headers['user-agent'] || 'unknown';
 
     const result = await authService.login(email, password, ipOrigen, userAgent);
+    req.user = {
+      id: result.usuario.id,
+      email: result.usuario.email,
+      rol: result.usuario.rol,
+    };
 
     return sendSuccess(res, {
       accessToken: result.accessToken,

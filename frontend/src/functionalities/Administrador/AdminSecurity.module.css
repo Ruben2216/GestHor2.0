@@ -1,0 +1,265 @@
+.page {
+  display: grid;
+  gap: 20px;
+  padding: 8px;
+}
+
+.header,
+.tableHeader,
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.header h2 {
+  color: #1e293b;
+  font-size: 24px;
+}
+
+.header p,
+.tableHeader span {
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.75fr) minmax(400px, 1.5fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 8%);
+}
+
+.card h3 {
+  margin-bottom: 16px;
+  color: #1e293b;
+  font-size: 17px;
+}
+
+.roleList {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.roleOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.roleOption:hover,
+.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.roleOption span:first-child,
+.permission span {
+  display: grid;
+  gap: 3px;
+}
+
+.roleOption small,
+.permission small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.form,
+.filters {
+  display: grid;
+  gap: 14px;
+}
+
+.form label,
+.filters label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form input:not([type="checkbox"]),
+.form textarea,
+.filters input,
+.filters select {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: #1e293b;
+  background: #fff;
+  font: inherit;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.checkLabel {
+  display: flex !important;
+  align-items: center;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  color: white;
+  background: #2563eb;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.secondaryButton {
+  color: #334155;
+  background: white;
+  border-color: #cbd5e1;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.permissionSection {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.permissionList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+}
+
+.permission {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 9px !important;
+  padding: 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+
+.permission input,
+.checkLabel input {
+  margin-top: 3px;
+}
+
+.filters {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: end;
+}
+
+.filterActions {
+  display: flex;
+  gap: 8px;
+}
+
+.tableCard {
+  padding: 0;
+}
+
+.tableHeader,
+.pagination {
+  padding: 16px 20px;
+}
+
+.tableHeader h3 {
+  margin: 0;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 11px 12px;
+  border-top: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: #475569;
+  background: #f8fafc;
+}
+
+.table code {
+  white-space: normal;
+}
+
+.success {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.failure,
+.error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.notice {
+  color: #166534;
+  font-weight: 600;
+}
+
+.pagination {
+  justify-content: flex-end;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}

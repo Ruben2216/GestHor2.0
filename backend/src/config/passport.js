@@ -11,13 +11,20 @@ passport.use(
         },
         async (_accessToken, _refreshToken, profile, done) => {
             try {
-                const email = profile.emails?.[0]?.value;
+                const googleEmail = profile.emails?.find(({ verified }) => verified) || profile.emails?.[0];
+                const email = googleEmail?.value;
 
                 if (!email) {
                     return done(null, false, { message: 'No se pudo obtener el email de Google' });
                 }
 
-                return done(null, { email });
+                return done(null, {
+                    email,
+                    emailVerified: googleEmail.verified === true,
+                    displayName: profile.displayName,
+                    givenName: profile.name?.givenName,
+                    familyName: profile.name?.familyName,
+                });
             } catch (error) {
                 console.error('Error en la estrategia de Google:', error);
                 return done(error, null);

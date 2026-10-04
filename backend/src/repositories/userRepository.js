@@ -7,10 +7,73 @@ export async function findByEmail(email) {
            r.nombre_rol
     FROM usuarios u
     LEFT JOIN roles r ON r.rol_id = u.rol_id
-    WHERE u.email = $1 AND u.activo = TRUE
+    WHERE LOWER(u.email) = LOWER($1) AND u.activo = TRUE
     LIMIT 1
   `;
   return dbConnection.oneOrNone(sql, [email]);
+}
+
+export async function createGoogleProfessor({ email, passwordHash, nombre, nombres, apellidos }) {
+  return dbConnection.tx(async (transaction) => {
+    const existingUser = await transaction.oneOrNone(`
+      SELECT u.usuario_id, u.email, u.password_hash, u.nombre, u.activo, u.rol_id, u.fecha_creacion, u.ultimo_login,
+             r.nombre_rol
+      FROM usuarios u
+      LEFT JOIN roles r ON r.rol_id = u.rol_id
+      WHERE LOWER(u.email) = LOWER($1)
+      LIMIT 1
+      FOR UPDATE OF u
+    `, [email]);
+
+    if (existingUser) {
+      return existingUser.activo ? existingUser : null;
+    }
+
+    const role = await transaction.oneOrNone(
+      `SELECT rol_id FROM roles WHERE nombre_rol = 'profesor' AND activo = TRUE LIMIT 1`
+    );
+    if (!role) {
+      throw new Error('No se encontró un rol de profesor activo para registrar la cuenta de Google');
+    }
+
+    const createdUser = await transaction.oneOrNone(`
+      INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, email_verificado)
+      VALUES ($1, $2, $2, $3, $4, TRUE, TRUE)
+      ON CONFLICT (email) DO NOTHING
+      RETURNING usuario_id
+    `, [email, passwordHash, nombre, role.rol_id]);
+
+    if (!createdUser) {
+      const concurrentUser = await transaction.oneOrNone(`
+        SELECT u.usuario_id, u.email, u.password_hash, u.nombre, u.activo, u.rol_id, u.fecha_creacion, u.ultimo_login,
+               r.nombre_rol
+        FROM usuarios u
+        LEFT JOIN roles r ON r.rol_id = u.rol_id
+        WHERE LOWER(u.email) = LOWER($1) AND u.activo = TRUE
+        LIMIT 1
+      `, [email]);
+      return concurrentUser;
+    }
+
+    await transaction.none(`
+      INSERT INTO profesores (profesor_id, nombres, apellidos, matricula, email)
+      VALUES ($1, $2, $3, $4, $5)
+    `, [
+      createdUser.usuario_id,
+      nombres,
+      apellidos,
+      `GOOGLE-PEND-${createdUser.usuario_id}`,
+      email,
+    ]);
+
+    return transaction.one(`
+      SELECT u.usuario_id, u.email, u.password_hash, u.nombre, u.activo, u.rol_id, u.fecha_creacion, u.ultimo_login,
+             r.nombre_rol
+      FROM usuarios u
+      LEFT JOIN roles r ON r.rol_id = u.rol_id
+      WHERE u.usuario_id = $1
+    `, [createdUser.usuario_id]);
+  });
 }
 
 export async function findById(userId) {

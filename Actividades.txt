@@ -1,0 +1,93 @@
+Auditoría y administración de roles/permisos
+Responsabilidad: 
+    Implementar la trazabilidad de acciones y las pantallas administrativas para gestionar roles y permisos.
+    Este integrante no será auditor del código. Será responsable de desarrollar el módulo funcional de auditoría y administración.
+
+Actividades:
+    Actividad = -
+    Resultado esperado = -- 
+
+    -Crear tabla auditoria
+    --Almacenar las acciones relevantes del sistema.
+
+    -Registrar usuario autenticado
+    --Obtenerlo desde req.user, no desde el frontend.
+
+    -Registrar fecha y hora
+    --Guardar timestamp del servidor.
+
+    -Registrar dirección IP
+    --Guardar IP de la solicitud.
+
+    -Registrar acción realizada
+    --Login, logout, creación, edición, eliminación, cambio de rol, etc.
+
+    -Registrar recurso afectado
+    --Horario, materia, docente, usuario, rol o permiso.
+
+    -Crear función reutilizable registrarAuditoria()
+    --Facilitar su uso desde controladores.
+
+    -Registrar login exitoso y fallido
+    --Agregar trazabilidad de autenticación.
+
+    -Registrar operaciones administrativas
+    --Crear, editar y eliminar usuarios, horarios y catálogos.
+
+    -Crear pantalla de consulta de auditoría
+    --Mostrar filtros por fecha, usuario, acción y módulo.
+
+    -Crear pantalla de administración de roles
+    --Crear, editar y activar/desactivar roles.
+
+    -Crear pantalla de permisos por rol
+    --Asignar y revocar permisos dinámicamente.
+
+Archivos principales
+    backend/src/models/
+    backend/src/services/
+    backend/src/controllers/
+    backend/src/routes/
+    frontend/src/functionalities/Administrador/
+    frontend/src/services/
+    ejecutarFinal.sql
+
+Entregables
+    Tabla de auditoría.
+    Servicio reutilizable de auditoría.
+    Endpoints de consulta.
+    Pantalla administrativa de auditoría.
+    Pantalla de roles.
+    Pantalla de permisos por rol.
+    Registro de IP y usuario.
+
+Auditoría de accesos
+La auditoría debe registrar como mínimo:
+
+    Text
+    usuario_id
+    email
+    rol
+    fecha_hora
+    direccion_ip
+    accion
+    resultado
+    recurso
+    metodo_http
+    ruta
+
+Debe registrar:
+    Login exitoso.
+    Login fallido.
+    Cambio de contraseña.
+    Recuperación de contraseña.
+    Creación, edición y eliminación de datos.
+    Cambios de roles y permisos
+    
+Criterios de aceptación
+    Cada acción administrativa genera un registro.
+    El registro incluye usuario, fecha, IP, acción y recurso.
+    Un alumno no puede consultar la auditoría.
+    Solo el administrador puede modificar roles y permisos.
+    La auditoría no cuenta con endpoint de edición o eliminación.
+    Los filtros de auditoría funcionan desde el dashboard.

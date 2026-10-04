@@ -1,9 +1,10 @@
 import * as userService from './userService.js';
+import * as userRepository from '../repositories/userRepository.js';
 import * as tokenService from './tokenService.js';
 import * as refreshTokenRepository from '../repositories/refreshTokenRepository.js';
 import * as sessionService from './sessionService.js';
 import * as passwordService from './passwordService.js';
-import { hashToken, hashPassword, comparePassword } from '../utils/crypto.js';
+import { hashToken, hashPassword, comparePassword, generateRandomToken } from '../utils/crypto.js';
 import { UnauthorizedError, ValidationError, TokenReusedError, NotFoundError } from '../utils/errors.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
 
@@ -29,8 +30,40 @@ export async function login(email, password, ipOrigen, userAgent) {
   return createUserSession(user, ipOrigen, userAgent);
 }
 
-export async function socialLogin(email, ipOrigen, userAgent) {
-  const user = await userService.findByEmail(email);
+export async function socialLogin(email, ipOrigen, userAgent, googleProfile = {}) {
+  let user;
+  try {
+    user = await userService.findByEmail(email);
+  } catch (error) {
+    if (!(error instanceof NotFoundError)) throw error;
+  }
+
+  if (!user) {
+    if (!googleProfile.emailVerified) {
+      throw new UnauthorizedError(
+        'Google debe verificar el correo antes de crear una cuenta',
+        AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS
+      );
+    }
+
+    const displayName = googleProfile.displayName?.trim() || email.split('@')[0];
+    const nameParts = displayName.split(/\s+/).filter(Boolean);
+    const nombres = (googleProfile.givenName?.trim() || nameParts.slice(0, -1).join(' ') || nameParts[0] || 'Profesor').slice(0, 100);
+    const apellidos = (googleProfile.familyName?.trim() || nameParts.slice(1).join(' ') || 'Pendiente').slice(0, 100);
+
+    user = await userRepository.createGoogleProfessor({
+      email: email.trim().toLowerCase(),
+      passwordHash: await hashPassword(generateRandomToken()),
+      nombre: displayName.slice(0, 150),
+      nombres,
+      apellidos,
+    });
+
+    if (!user) {
+      throw new NotFoundError('La cuenta de Google no está registrada como usuario activo');
+    }
+  }
+
   return createUserSession(user, ipOrigen, userAgent);
 }
 

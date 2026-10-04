@@ -21,6 +21,9 @@ import Lugares from "./functionalities/Administrador/Lugares.jsx";
 import Horarios from "./functionalities/Administrador/Horarios.jsx";
 import Solicitudes from "./functionalities/Administrador/Solicitudes.jsx";
 import Periodos from "./functionalities/Administrador/Periodos.jsx";
+import Auditoria from "./functionalities/Administrador/Auditoria.jsx";
+import RolesPermisos from "./functionalities/Administrador/RolesPermisos.jsx";
+import UsuariosRoles from "./functionalities/Administrador/UsuariosRoles.jsx";
 
 import "./App.css";
 
@@ -53,6 +56,9 @@ function App() {
           <Route path="periodos" element={<Navigate to="/admin/configuracion" replace />} />
           <Route path="horarios" element={<Horarios />} />
           <Route path="solicitudes" element={<Solicitudes />} />
+          <Route path="auditoria" element={<Auditoria />} />
+          <Route path="roles" element={<RolesPermisos />} />
+          <Route path="usuarios" element={<UsuariosRoles />} />
         </Route>
 
         {/* si alguien entra a ruta vieja */}

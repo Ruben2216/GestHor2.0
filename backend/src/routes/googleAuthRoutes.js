@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Ruta para iniciar autenticación con Google
 router.get(
-    '/auth/google',
+    '/google',
     passport.authenticate('google', { 
         scope: ['profile', 'email'] 
     })
@@ -14,7 +14,7 @@ router.get(
 
 // Ruta de callback después de autenticarse con Google
 router.get(
-    '/auth/google/callback',
+    '/google/callback',
     passport.authenticate('google', { 
         failureRedirect: '/api/auth/google/failure',
         session: false 
@@ -23,6 +23,6 @@ router.get(
 );
 
 // Ruta en caso de fallo en la autenticación
-router.get('/auth/google/failure', googleAuthFailure);
+router.get('/google/failure', googleAuthFailure);
 
 export default router;

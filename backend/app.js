@@ -21,12 +21,17 @@ import solicitudRecuperacionRoutes from './src/routes/solicitudRecuperacionRoute
 import tipoContratoRoutes from './src/routes/tipoContratoRoutes.js';
 import sugerenciaRoutes from './src/routes/sugerenciaRoutes.js';
 import periodoRoutes from './src/routes/periodoRoutes.js';
+import auditRoutes from './src/routes/auditRoutes.js';
+import roleRoutes from './src/routes/roleRoutes.js';
+import adminUserRoutes from './src/routes/adminUserRoutes.js';
+import { auditRequest } from './src/middlewares/audit.js';
 import { sanitize } from './src/utils/sanitizeJson.js';
 
 const app = express();
 
 app.use(cors(env.cors));
 app.use(express.json());
+app.use(auditRequest);
 
 // Configurar sesiones para passport
 app.use(
@@ -67,6 +72,9 @@ app.use('/api', solicitudRecuperacionRoutes);
 app.use('/api', tipoContratoRoutes);
 app.use('/api', sugerenciaRoutes);
 app.use('/api', periodoRoutes);
+app.use('/api/auditoria', auditRoutes);
+app.use('/api/admin/roles', roleRoutes);
+app.use('/api/admin/usuarios', adminUserRoutes);
 
 // Health-check simple y prueba de conexión
 app.get("/api", async (_req, res) => {

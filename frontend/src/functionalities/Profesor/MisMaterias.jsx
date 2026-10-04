@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/profesor.css";
 import ProfesorTabs from "../../components/Profesor/ProfesorTabs";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 
 import { MdDashboard } from "react-icons/md";
 import { FiLogOut, FiSearch } from "react-icons/fi";
+import { cerrarSesion } from "../../services/sessionService";
 import { FaBookOpen, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
 
 export default function MisMaterias() {
@@ -100,9 +101,8 @@ export default function MisMaterias() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+    const handleLogout = async () => {
+        await cerrarSesion();
         navigate("/login");
     };
 

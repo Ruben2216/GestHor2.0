@@ -14,6 +14,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 
 import { MdEventAvailable } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
+import { cerrarSesion } from "../../services/sessionService";
 import { FaRegClock, FaSave, FaBroom, FaCheckSquare, FaClipboardList, FaCommentDots } from "react-icons/fa";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
@@ -210,9 +211,8 @@ export default function Disponibilidad() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+    const handleLogout = async () => {
+        await cerrarSesion();
         navigate("/login");
     };
 

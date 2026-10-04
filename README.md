@@ -1,3 +1,4 @@
+
 # GestHor
 Para clonar el repositorio hacer lo siguiente:
 git clone https://github.com/FernandoVargas15/GestHor.git
@@ -50,6 +51,15 @@ DB_PASSWORD=1234
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=GesThor
+
+# Auditoría, administración de roles y permisos
+Al actualizar una base de datos existente, ejecutar la migración una sola vez desde PowerShell en la raíz del repositorio:
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5432 -U postgres -d GestHor -W -v ON_ERROR_STOP=1 -f "backend\src\database\migrations\003_auditoria_administracion.sql"
+```
+
+La API de auditoría permite consultar registros y no expone endpoints de edición o eliminación. El backend registra accesos y operaciones de escritura, incluyendo usuario autenticado, correo, rol, fecha del servidor, IP, acción, resultado, recurso, método HTTP y ruta. Las pantallas de **Roles y permisos**, **Asignar roles** y **Auditoría** se encuentran en el menú administrativo y están restringidas en el backend al rol administrador. Al asignar un rol se revocan las sesiones existentes del usuario para que vuelva a iniciar sesión con los nuevos permisos; no es posible cambiar el propio rol ni quitar el rol al último administrador activo.
 
 
 # Ejecutar para actualizar la tabla profesores en postgresql web
