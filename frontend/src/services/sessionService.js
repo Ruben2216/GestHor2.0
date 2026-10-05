@@ -1,17 +1,15 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api';
+import apiClient from './apiClient';
+import authStorage from './authStorage';
 
 export async function cerrarSesion() {
   try {
-    await axios.post(`${API_URL}/auth/logout`, {
-      refreshToken: localStorage.getItem('refreshToken'),
-    });
+    const refreshToken = authStorage.getRefreshToken();
+    if (refreshToken) {
+      await apiClient.post('/auth/logout', { refreshToken });
+    }
   } catch (error) {
-    console.error('No se pudo invalidar la sesión en el servidor:', error);
+    console.warn('No se pudo invalidar la sesión en el servidor:', error);
   } finally {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    authStorage.clearSession();
   }
 }

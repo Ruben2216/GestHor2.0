@@ -1,24 +1,37 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
 import styles from "../styles/LoginForm.module.css";
 import PasswordInput from "../components/ui/PasswordInput";
 import usePageTitle from "../hooks/usePageTitle";
-
-const API_URL = 'http://localhost:3000/api';
-
+import { useAuth } from "../hooks/useAuth";
 
 function LoginForm() {
-   usePageTitle("Ingresar al sitio");
+  usePageTitle("Ingresar al sitio");
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
   const [tipoUsuario, setTipoUsuario] = useState("");
   const [error, setError] = useState(null);
+  const [infoMsg, setInfoMsg] = useState(null);
   const [cargando, setCargando] = useState(false);
+  
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { login, isAuthenticated, role } = useAuth();
+
+  // Si ya está autenticado, redirigir automáticamente
+  useEffect(() => {
+    if (isAuthenticated && role) {
+      redirectByRole(role);
+    }
+  }, [isAuthenticated, role]);
 
   useEffect(() => {
+    // Si viene de sesión expirada
+    if (searchParams.get("session_expired")) {
+      setInfoMsg("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+      window.history.replaceState({}, '', '/login');
+    }
+
     // Verificar si hay un error de Google OAuth en la URL
     const oauthError = searchParams.get("error");
     if (oauthError) {
@@ -26,26 +39,38 @@ function LoginForm() {
       
       switch (oauthError) {
         case "user_not_found":
-          errorMessage = "Usuario no encontrado en la base de datos";
+          errorMessage = "Usuario no registrado en el sistema";
           break;
         case "no_email":
-          errorMessage = "No se pudo obtener el email de Google";
+          errorMessage = "No se pudo obtener el correo de Google";
           break;
         case "auth_failed":
           errorMessage = "Falló la autenticación con Google";
           break;
         case "server_error":
-          errorMessage = "Error en el servidor";
+          errorMessage = "Error temporal en el servicio de autenticación";
           break;
         default:
-          errorMessage = "Error desconocido";
+          errorMessage = "No se pudo iniciar sesión con Google";
       }
       
       setError(errorMessage);
-      // Limpiar el parámetro de error de la URL
       window.history.replaceState({}, '', '/login');
     }
   }, [searchParams]);
+
+  const redirectByRole = (userRole) => {
+    const r = String(userRole || '').toLowerCase().trim();
+    if (r === "administrador" || r === "editor" || r === "docente") {
+      navigate("/admin/dashboard");
+    } else if (r === "profesor") {
+      navigate("/profesor/mi-horario");
+    } else if (r === "alumno" || r === "estudiante" || r === "usuario_regular") {
+      navigate("/alumno/horarios");
+    } else {
+      navigate("/admin/dashboard");
+    }
+  };
 
   const handleInputChange = (event) => {
     const { id, value } = event.target;
@@ -57,57 +82,26 @@ function LoginForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
+    setInfoMsg(null);
     setCargando(true);
 
     try {
-      // enviar datos al backend
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        correo,
-        contraseña,
-        tipoUsuario,
-      });
+      const result = await login(correo, contraseña, tipoUsuario);
 
-      const result = response.data;
-
-      // si hay error (credenciales o rol incorrecto)
-      if (!result.ok) {
-        setError(result?.message || "Error en el login");
-        setCargando(false);
+      if (!result.success) {
+        setError(result.message || "Credenciales incorrectas");
         return;
       }
 
-      // si todo esta bien, redirige según el rol
-      const rol = result?.data?.usuario?.rol;
-
-      // Guardar tokens y usuario en localStorage
-      localStorage.setItem("accessToken", result.data.accessToken);
-      localStorage.setItem("refreshToken", result.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify({
-        usuario_id: result.data.usuario.id,
-        email: result.data.usuario.email,
-        rol: result.data.usuario.rol,
-        nombre: result.data.usuario.nombre
-      }));
-
-      if (rol === "administrador") {
-        navigate("/admin/admin-dashboard");
-      } else if (rol === "profesor") {
-        navigate("/profesor/mi-horario");
-      } else {
-        navigate("/");
-      }
-
-    } catch (err) {
-      console.error("Error al conectar con el servidor:", err);
-      const mensaje = err.response?.data?.message || "No se pudo conectar con el servidor.";
-      setError(mensaje);
+      redirectByRole(result.role);
+    } catch {
+      setError("No se pudo iniciar sesión. Verifica tus datos de acceso.");
     } finally {
       setCargando(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    // Redirigir a la ruta de autenticación de Google en el backend
     window.location.href = "http://localhost:3000/api/auth/google";
   };
 
@@ -120,7 +114,7 @@ function LoginForm() {
           <p className={styles.infoText}>
             Bienvenido al sistema para administrar y consultar los horarios de clase.
             <br />
-            Inicia sesión para continuar.
+            Inicia sesión con tu cuenta institucional para continuar.
           </p>
         </div>
 
@@ -128,12 +122,27 @@ function LoginForm() {
           <div className={styles.loginCard}>
             <h2 className={styles.cardTitle}>INICIO DE SESIÓN</h2>
             <p className={styles.cardSubtitle}>
-              Por favor, ingresa tus datos para continuar
+              Ingresa tus credenciales para acceder a tu panel
             </p>
+
+            {infoMsg && (
+              <div style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                color: '#1d4ed8',
+                fontSize: '13px',
+                marginBottom: '16px',
+                textAlign: 'left'
+              }}>
+                {infoMsg}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className={styles.loginForm}>
               <div className={styles.formGroup}>
-                <label htmlFor="correo">Correo</label>
+                <label htmlFor="correo">Correo Electrónico</label>
                 <input
                   type="email"
                   id="correo"
@@ -142,6 +151,7 @@ function LoginForm() {
                   required
                   className={styles.inputField}
                   placeholder="Tucorreo@unach.mx"
+                  autoComplete="email"
                 />
               </div>
 
@@ -149,9 +159,10 @@ function LoginForm() {
                 id="contraseña"
                 value={contraseña}
                 onChange={handleInputChange}
-                placeholder="Ingresa tu contraseña o token de acceso"
+                placeholder="Ingresa tu contraseña de acceso"
                 required={true}
                 label="Contraseña"
+                autoComplete="current-password"
               />
 
               <div className={styles.forgotPasswordLink}>
@@ -165,7 +176,7 @@ function LoginForm() {
                 className={styles.loginButton}
                 disabled={cargando}
               >
-                {cargando ? "VALIDANDO..." : "INICIAR SESIÓN"}
+                {cargando ? "VALIDANDO CREDENCIALES..." : "INICIAR SESIÓN"}
               </button>
 
               <div className={styles.divider}>
@@ -177,7 +188,7 @@ function LoginForm() {
                 className={styles.googleButton}
                 onClick={handleGoogleLogin}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 48 48">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48">
                   <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
                   <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
                   <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>

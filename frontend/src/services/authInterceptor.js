@@ -1,11 +1,12 @@
 // Interceptor de autenticación para fetch y axios, que renueva el access token automáticamente
 
 import axios from 'axios';
+import authStorage from './authStorage';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Rutas que no llevan token ni deben disparar el refresh/redirección
-const RUTAS_PUBLICAS = ['/auth/login', '/auth/refresh', '/auth/google', '/auth/forgot-password', '/auth/reset-password'];
+const RUTAS_PUBLICAS = ['/auth/login', '/auth/refresh', '/auth/google', '/auth/forgot-password', '/auth/reset-password', '/recovery'];
 
 const fetchOriginal = window.fetch.bind(window);
 let refreshEnCurso = null;
@@ -20,12 +21,10 @@ function esPublica(url) {
 }
 
 function cerrarSesionLocal() {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
+  authStorage.clearSession();
   const { pathname } = window.location;
   if (pathname !== '/' && pathname !== '/login') {
-    window.location.href = '/';
+    window.location.href = '/login?session_expired=1';
   }
 }
 
@@ -33,7 +32,7 @@ function cerrarSesionLocal() {
 function renovarToken() {
   if (!refreshEnCurso) {
     refreshEnCurso = (async () => {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = authStorage.getRefreshToken();
       if (!refreshToken) return null;
 
       const res = await fetchOriginal(`${API_BASE}/auth/refresh`, {
@@ -44,9 +43,17 @@ function renovarToken() {
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.ok) return null;
 
-      localStorage.setItem('accessToken', body.data.accessToken);
-      localStorage.setItem('refreshToken', body.data.refreshToken);
-      return body.data.accessToken;
+      const newAccess = body.data?.accessToken || body.accessToken;
+      const newRefresh = body.data?.refreshToken || body.refreshToken;
+
+      if (newAccess) {
+        authStorage.setAccessToken(newAccess);
+        if (newRefresh) {
+          authStorage.setRefreshToken(newRefresh);
+        }
+        return newAccess;
+      }
+      return null;
     })()
       .catch(() => null)
       .finally(() => {
@@ -58,7 +65,7 @@ function renovarToken() {
 
 // ---------------------------------------------------------------- axios
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = authStorage.getAccessToken();
   if (token && esDeLaApi(config.url) && !esPublica(config.url)) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -100,7 +107,7 @@ window.fetch = async (input, init) => {
     return fetchOriginal(input, init);
   }
 
-  const token = localStorage.getItem('accessToken');
+  const token = authStorage.getAccessToken();
   const res = await fetchOriginal(input, token ? conToken(init, token) : init);
   if (res.status !== 401) return res;
 

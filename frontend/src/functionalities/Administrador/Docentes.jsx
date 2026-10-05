@@ -12,6 +12,8 @@ import { MdPeopleAlt, MdSave, MdCancel } from "react-icons/md";
 import { FaUserTie, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 
+import { usePermissions } from "../../hooks/usePermissions";
+
 function emptyForm() {
     return {
         nombres: "",
@@ -28,6 +30,11 @@ function emptyForm() {
 }
 
 export default function Docentes() {
+    const { canDeleteDocentes, canEditDocentes, canCreateDocentes, isAdmin, isEditor } = usePermissions();
+    const canDelete = isAdmin || canDeleteDocentes;
+    const canEdit = isAdmin || isEditor || canEditDocentes;
+    const canCreate = isAdmin || isEditor || canCreateDocentes;
+
     const [docentes, setDocentes] = useState([]);
     const [form, setForm] = useState(emptyForm());
     const [editingId, setEditingId] = useState(null);
@@ -275,14 +282,18 @@ export default function Docentes() {
                                 </div>
 
                                 <div className={styles["docentes__item-actions"]}>
-                                    <button className="link-btn" onClick={() => onEdit(d)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                        <FaEdit aria-hidden="true" />
-                                        Editar
-                                    </button>
-                                    <button className="link-btn link-btn--danger" onClick={() => onDelete(d.profesor_id)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                        <FaTrashAlt aria-hidden="true" />
-                                        Eliminar
-                                    </button>
+                                    {canEdit && (
+                                        <button className="link-btn" onClick={() => onEdit(d)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                            <FaEdit aria-hidden="true" />
+                                            Editar
+                                        </button>
+                                    )}
+                                    {canDelete && (
+                                        <button className="link-btn link-btn--danger" onClick={() => onDelete(d.profesor_id)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                            <FaTrashAlt aria-hidden="true" />
+                                            Eliminar
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))

@@ -6,6 +6,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import {
     MdPlace, MdDomain, MdMeetingRoom, MdSearch, MdFilterList, MdClear, MdAddBusiness, MdAdd, MdEdit, MdDelete, MdExpandMore, MdExpandLess
 } from "react-icons/md";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const TIPOS_EDIFICIO = ["Académico", "Laboratorio", "Administrativo"];
 const TIPOS_SALON = ["Aula", "Laboratorio", "Salas de usos múltiples", "Taller"];
@@ -24,6 +25,11 @@ function emptySalon() {
 
 export default function Lugares() {
     usePageTitle("Lugares");
+    const { canDeleteLugares, canEditLugares, canCreateLugares, isAdmin, isEditor } = usePermissions();
+    const canDelete = isAdmin || canDeleteLugares;
+    const canEdit = isAdmin || isEditor || canEditLugares;
+    const canCreate = isAdmin || isEditor || canCreateLugares;
+
     const [lugares, setLugares] = useState([]);
     const { notify } = useToast();
     const [expandedLugares, setExpandedLugares] = useState(new Set());
@@ -451,26 +457,34 @@ export default function Lugares() {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                    <button
-                                        className="btn"
-                                        onClick={(e) => { e.stopPropagation(); setFormEdificio((f) => ({ ...f, lugar_id: lugar.lugar_id })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-                                    >
-                                        <MdAdd aria-hidden="true" /> Agregar edificio
-                                    </button>
-                                    <button
-                                        className="btn"
-                                        onClick={(e) => { e.stopPropagation(); setFormSalon((f) => ({ ...f, edificio_id: (lugar.edificios && lugar.edificios[0] && lugar.edificios[0].edificio_id) || '' })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-                                    >
-                                        <MdAdd aria-hidden="true" /> Agregar salón
-                                    </button>
-                                    <button className="link-btn" onClick={(e) => { e.stopPropagation(); editarLugar(lugar); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                        <MdEdit aria-hidden="true" /> Editar
-                                    </button>
-                                    <button className="link-btn link-btn--danger" onClick={(e) => { e.stopPropagation(); eliminarLugar(lugar.lugar_id); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                        <MdDelete aria-hidden="true" /> Eliminar
-                                    </button>
+                                    {canCreate && (
+                                        <>
+                                            <button
+                                                className="btn"
+                                                onClick={(e) => { e.stopPropagation(); setFormEdificio((f) => ({ ...f, lugar_id: lugar.lugar_id })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                                            >
+                                                <MdAdd aria-hidden="true" /> Agregar edificio
+                                            </button>
+                                            <button
+                                                className="btn"
+                                                onClick={(e) => { e.stopPropagation(); setFormSalon((f) => ({ ...f, edificio_id: (lugar.edificios && lugar.edificios[0] && lugar.edificios[0].edificio_id) || '' })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                                            >
+                                                <MdAdd aria-hidden="true" /> Agregar salón
+                                            </button>
+                                        </>
+                                    )}
+                                    {canEdit && (
+                                        <button className="link-btn" onClick={(e) => { e.stopPropagation(); editarLugar(lugar); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                            <MdEdit aria-hidden="true" /> Editar
+                                        </button>
+                                    )}
+                                    {canDelete && (
+                                        <button className="link-btn link-btn--danger" onClick={(e) => { e.stopPropagation(); eliminarLugar(lugar.lugar_id); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                            <MdDelete aria-hidden="true" /> Eliminar
+                                        </button>
+                                    )}
                                     {expandedLugares.has(lugar.lugar_id) ? <MdExpandLess aria-hidden="true" /> : <MdExpandMore aria-hidden="true" />}
                                 </div>
                             </div>
@@ -496,19 +510,25 @@ export default function Lugares() {
                                                     <div className="form__hint">{(ed.salones || []).length} salón(es)</div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                    <button
-                                                        className="btn"
-                                                        onClick={(e) => { e.stopPropagation(); setFormSalon((f) => ({ ...f, edificio_id: ed.edificio_id })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-                                                    >
-                                                        <MdAdd aria-hidden="true" /> Agregar salón
-                                                    </button>
-                                                    <button className="link-btn" onClick={(e) => { e.stopPropagation(); editarEdificio(lugar.lugar_id, ed); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                                        <MdEdit aria-hidden="true" /> Editar
-                                                    </button>
-                                                    <button className="link-btn link-btn--danger" onClick={(e) => { e.stopPropagation(); eliminarEdificio(ed.edificio_id); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                                        <MdDelete aria-hidden="true" /> Eliminar
-                                                    </button>
+                                                    {canCreate && (
+                                                        <button
+                                                            className="btn"
+                                                            onClick={(e) => { e.stopPropagation(); setFormSalon((f) => ({ ...f, edificio_id: ed.edificio_id })); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                                                        >
+                                                            <MdAdd aria-hidden="true" /> Agregar salón
+                                                        </button>
+                                                    )}
+                                                    {canEdit && (
+                                                        <button className="link-btn" onClick={(e) => { e.stopPropagation(); editarEdificio(lugar.lugar_id, ed); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                            <MdEdit aria-hidden="true" /> Editar
+                                                        </button>
+                                                    )}
+                                                    {canDelete && (
+                                                        <button className="link-btn link-btn--danger" onClick={(e) => { e.stopPropagation(); eliminarEdificio(ed.edificio_id); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                            <MdDelete aria-hidden="true" /> Eliminar
+                                                        </button>
+                                                    )}
                                                     {expandedEdificios.has(ed.edificio_id) ? <MdExpandLess aria-hidden="true" /> : <MdExpandMore aria-hidden="true" />}
                                                 </div>
                                             </div>
@@ -530,12 +550,16 @@ export default function Lugares() {
                                                                     <div className="form__hint">{s.tipo_salon || ''}</div>
                                                                 </div>
                                                                 <div>
-                                                                    <button className="link-btn" onClick={() => editarSalon(ed.edificio_id, s)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                                                        <MdEdit aria-hidden="true" /> Editar
-                                                                    </button>
-                                                                    <button className="link-btn link-btn--danger" onClick={() => eliminarSalon(s.salon_id)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                                                        <MdDelete aria-hidden="true" /> Eliminar
-                                                                    </button>
+                                                                    {canEdit && (
+                                                                        <button className="link-btn" onClick={() => editarSalon(ed.edificio_id, s)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                                            <MdEdit aria-hidden="true" /> Editar
+                                                                        </button>
+                                                                    )}
+                                                                    {canDelete && (
+                                                                        <button className="link-btn link-btn--danger" onClick={() => eliminarSalon(s.salon_id)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                                            <MdDelete aria-hidden="true" /> Eliminar
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
