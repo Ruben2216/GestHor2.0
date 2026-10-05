@@ -6,8 +6,7 @@
 -- Requiere: ejecutarFinal.sql, 001_auth_module.sql y 002_roles_permisos.sql
 -- ============================================================================
 
--- Contraseña para todos los usuarios de prueba: test1234
--- Hash bcrypt (12 rounds): $2b$12$QPIlb.vUezYMbU2dwkyCCObzYsp/KqVvxiG6jJBS2374p4rfnSVWC
+-- Hash bcrypt de ejemplo para desarrollo local (Reemplazar según políticas del entorno)
 -- La columna legacy "password" es NOT NULL en ejecutarFinal.sql, por eso se llena con el mismo hash.
 
 INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
@@ -36,10 +35,10 @@ WHERE email = 'test.profe@unach.mx'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- CREDENCIALES DE PRUEBA
+-- USUARIOS DE PRUEBA REGISTRADOS
 -- ============================================================================
--- Email: test.admin@unach.mx        | Password: test1234 | Rol: administrador
--- Email: test.editor@unach.mx       | Password: test1234 | Rol: docente (editor)
--- Email: test.profe@unach.mx        | Password: test1234 | Rol: profesor
--- Email: test.estudiante@unach.mx   | Password: test1234 | Rol: estudiante (alumno)
+-- Email: test.admin@unach.mx        | Rol: administrador
+-- Email: test.editor@unach.mx       | Rol: docente (editor)
+-- Email: test.profe@unach.mx        | Rol: profesor
+-- Email: test.estudiante@unach.mx   | Rol: estudiante (alumno)
 -- ============================================================================

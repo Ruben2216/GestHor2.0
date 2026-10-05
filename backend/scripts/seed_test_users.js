@@ -2,7 +2,8 @@ import bcrypt from 'bcrypt';
 import { dbConnection } from '../src/config/database.js';
 
 async function seed() {
-  const hash = await bcrypt.hash('123456', 10);
+  const password = process.env.SEED_TEST_PASSWORD || 'DefaultSeedSecurePass#2026';
+  const hash = await bcrypt.hash(password, 10);
 
   // Asegurar roles
   await dbConnection.none(`

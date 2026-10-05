@@ -1,11 +1,10 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { env } from './env.js';
 
 export const jwtConfig = {
-  accessSecret: process.env.JWT_SECRET ,
-  refreshSecret: process.env.JWT_REFRESH_SECRET ,
-  accessExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
-  refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-  issuer: 'gesthor-api',
-  audience: 'gesthor-client',
+  accessSecret: env.jwt.secret,
+  refreshSecret: env.jwt.refreshSecret,
+  accessExpiresIn: env.jwt.expiresIn,
+  refreshExpiresIn: env.jwt.refreshExpiresIn,
+  issuer: env.jwt.issuer,
+  audience: env.jwt.audience,
 };

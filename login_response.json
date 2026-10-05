@@ -1,8 +1,0 @@
-  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
-                                 Dload  Upload  Total   Spent   Left   Speed
-
-  0      0   0      0   0      0      0      0                              0
-100    880 100    823 100     57   1249     86                              0
-100    880 100    823 100     57   1249     86                              0
-100    880 100    823 100     57   1248     86                              0
-{"ok":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM2LCJlbWFpbCI6InRlc3QucHJvZmVAdW5hY2gubXgiLCJyb2wiOiJwcm9mZXNvciIsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI4NWU1MjYxMi1lOWZhLTQyNTEtOWY0ZS03NTkxNTcxZDdlMmIiLCJpYXQiOjE3OTEwNDQ4NjEsImV4cCI6MTc5MTA0NTc2MSwiYXVkIjoiZ2VzdGhvci1jbGllbnQiLCJpc3MiOiJnZXN0aG9yLWFwaSJ9.Qj58U6K1l91s5BknrMLj3FKw9euVktCcZmHejpJBTZI","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM2LCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IjBjOWIyZmIzLTdlMmYtNGRiNy05NjFlLTZkNDE2M2IzZTJmMCIsImlhdCI6MTc5MTA0NDg2MSwiZXhwIjoxNzkxNjQ5NjYxLCJhdWQiOiJnZXN0aG9yLWNsaWVudCIsImlzcyI6Imdlc3Rob3ItYXBpIn0.ymOgWgWsht762H7lAg_bffQhDXabYo_ITSsBwyZcpAU","usuario":{"id":36,"email":"test.profe@unach.mx","rol":"profesor","nombre":"Test Profesor"}},"message":"Inicio de sesi├│n exitoso","statusCode":200}

@@ -89,10 +89,20 @@ export const requirePermission = (...permissions) => {
       return sendError(res, 'No autenticado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
     }
 
+    if (req.user.rol === 'administrador') {
+      return next();
+    }
+
     try {
       const userPermissions = await loadPermissions(req);
 
-      if (!permissions.some(p => userPermissions.includes(p))) {
+      const expandedPermissions = permissions.flatMap(p => {
+        if (p.startsWith('docentes:')) return [p, p.replace('docentes:', 'profesores:')];
+        if (p.startsWith('profesores:')) return [p, p.replace('profesores:', 'docentes:')];
+        return [p];
+      });
+
+      if (!expandedPermissions.some(p => userPermissions.includes(p))) {
         return sendError(res, 'No tiene permisos para acceder a este recurso', AUTH_CONSTANTS.ERROR_CODES.FORBIDDEN, AUTH_CONSTANTS.HTTP_STATUS.FORBIDDEN);
       }
 

@@ -1,7 +1,7 @@
 // Pruebas de criterios de aceptación - Módulo 2 (roles, permisos y protección)
 
 const API = process.env.API_URL || 'http://localhost:3000/api';
-const PASSWORD = 'test1234';
+const PASSWORD = process.env.TEST_USER_PASSWORD || 'PlaceholderTestPassword#123';
 const NO_EXISTE = 999999;
 
 let fallos = 0;

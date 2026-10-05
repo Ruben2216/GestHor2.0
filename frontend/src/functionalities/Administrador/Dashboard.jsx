@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import styles from "./Dashboard.module.css";
 import { useToast } from "../../components/ui/NotificacionFlotante";
-import { obtenerEstadisticasDocentes } from "../../services/docenteService";
+import { obtenerEstadisticasDocentes, obtenerDocentes } from "../../services/docenteService";
 import { obtenerEstadisticasCarreras } from "../../services/carreraService";
+import apiClient from "../../services/apiClient";
 import { HorarioPDFExporter } from "../../utils/pdfExportService";
 import { HorarioExcelExporter } from "../../utils/excelExportService";
 import usePageTitle from "../../hooks/usePageTitle";
@@ -90,16 +91,14 @@ function ScheduleTable() {
     (async () => {
       try {
         setError(null);
-        const r = await fetch(`${API_URL}/docentes`);
-        if (!r.ok) throw new Error("No se pudieron cargar los docentes.");
-        const data = await r.json();
+        const data = await obtenerDocentes();
         const lista = Array.isArray(data) ? data : data.docentes || [];
         if (!abort) {
           setDocentes(lista);
           setSugerencias(lista.slice(0, 8));
         }
       } catch (e) {
-        if (!abort) setError(e.message);
+        if (!abort) setError(e.message || "No se pudieron cargar los docentes.");
       }
     })();
     return () => {
@@ -112,9 +111,7 @@ function ScheduleTable() {
     let abort = false;
     (async () => {
       try {
-        const r = await fetch(`${API_URL}/lugares`);
-        if (!r.ok) throw new Error('No se pudieron cargar los lugares.');
-        const json = await r.json();
+        const { data: json } = await apiClient.get('/lugares');
         const estructura = Array.isArray(json) ? json : json.lugares || json;
         if (abort) return;
         setLugaresEstructura(estructura || []);
@@ -170,13 +167,11 @@ function ScheduleTable() {
         setCargando(true);
         setError(null);
 
-        const resp = await fetch(
-          `${API_URL}/horarios/profesor/${encodeURIComponent(
+        const { data: json } = await apiClient.get(
+          `/horarios/profesor/${encodeURIComponent(
             profesorSel.profesor_id
           )}`
         );
-        if (!resp.ok) throw new Error("No se pudo obtener el horario del profesor.");
-        const json = await resp.json();
         const rows = Array.isArray(json?.horarios)
           ? json.horarios
           : Array.isArray(json)
@@ -374,9 +369,7 @@ function ScheduleTable() {
               setSalonHorarios([]);
               if (val) {
                 try {
-                  const resp = await fetch(`${API_URL}/horarios/salon/${encodeURIComponent(val)}`);
-                  if (!resp.ok) throw new Error('No se pudieron obtener los horarios del salón');
-                  const json = await resp.json();
+                  const { data: json } = await apiClient.get(`/horarios/salon/${encodeURIComponent(val)}`);
                   const rows = Array.isArray(json?.horarios) ? json.horarios : [];
                   setSalonHorarios(rows);
                 } catch (err) {
@@ -618,8 +611,7 @@ export default function Dashboard() {
           obtenerEstadisticasCarreras(),
         ]);
 
-        const respLugares = await fetch(`${API_URL}/lugares`);
-        const dataLugares = await respLugares.json();
+        const { data: dataLugares } = await apiClient.get('/lugares');
         const estructura = Array.isArray(dataLugares)
           ? dataLugares
           : dataLugares.lugares || [];
@@ -631,15 +623,14 @@ export default function Dashboard() {
           }
         }
 
-        const respHorarios = await fetch(`${API_URL}/horarios`);
-        const dataHorarios = await respHorarios.json();
+        const { data: dataHorarios } = await apiClient.get('/horarios');
         const totalActivos = Array.isArray(dataHorarios)
           ? dataHorarios.length
           : dataHorarios.horarios?.length || 0;
 
         setStats({
-          docentes: estadisticasDocentes.estadisticas.totalDocentes,
-          carreras: estadisticasCarreras.estadisticas.totalCarreras,
+          docentes: estadisticasDocentes?.estadisticas?.totalDocentes ?? 0,
+          carreras: estadisticasCarreras?.estadisticas?.totalCarreras ?? 0,
           salones: totalSalones,
           activos: totalActivos,
         });

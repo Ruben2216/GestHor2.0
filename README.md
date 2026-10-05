@@ -44,13 +44,13 @@ sudo systemctl stop postgresql    # Detiene PostgreSQL (base de datos)
 ejecutar el .sql dentro de 'Query tool' de pgAdmin4 web con el nombre de GesThor la BDTS 
 
 # env
-debe estar en la carpeta backend
+debe estar en la carpeta backend (ver backend/.env.example)
 
-DB_USER=postgres
-DB_PASSWORD=1234
+DB_USER=tu_usuario
+DB_PASSWORD=tu_contrasena_segura
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=GesThor
+DB_NAME=GestHor
 
 # Auditoría, administración de roles y permisos
 Al actualizar una base de datos existente, ejecutar la migración una sola vez desde PowerShell en la raíz del repositorio:
@@ -84,51 +84,31 @@ SELECT setval('public.profesores_profesor_id_seq',
 SELECT 
     column_name, 
     column_default 
-FROM information_schema.columns 
+    FROM information_schema.columns 
 WHERE table_name = 'profesores' 
   AND column_name = 'profesor_id';
 
 
-# Prueba para la base de datos (admin y profesor) / Insertar en pgweb
--- ADMIN (email: admin@unach.mx / pass: 123456)
-INSERT INTO usuarios (email, password, rol_id)
-VALUES ('admin@unach.mx', '123456', 1);
+# Creación de usuarios administradores y profesores
+> **Seguridad**: Nunca inserte contraseñas en texto plano. Utilice contraseñas con hash bcrypt generadas a través del script de inicialización o mediante la funcionalidad de usuarios.
 
--- PROFESOR (email: profe@unach.mx / pass: 123456)
-WITH u AS (
-  INSERT INTO usuarios (email, password, rol_id)
-  VALUES ('profe@unach.mx', '123456', 2)
-  RETURNING usuario_id
-)
-INSERT INTO profesores (profesor_id, nombres, apellidos, matricula)
-SELECT usuario_id, 'Juan', 'Pérez', 'MAT-0001' FROM u;
+Ejemplo con hash bcrypt:
+```sql
+-- Usuario de ejemplo con hash seguro (Reemplazar <PASSWORD_HASH> por el hash generado)
+INSERT INTO usuarios (email, password, password_hash, rol_id)
+VALUES ('admin@unach.mx', '<HASH_BCRYPT>', 1);
+```
 
-# Instalar lo siguiente en el la carpeta del backend
+# Instalar lo siguiente en la carpeta del backend
 npm install pg-promise cors dotenv
 
-# Correos y contraseñas de los usuarios para el login (prueba)
-Administrador
-Correo: admin@unach.mx
-Contraseña: 123456
+# Usuarios y roles del sistema
+- Administrador: Gestiona configuraciones, horarios, usuarios y roles.
+- Profesor: Consulta y gestiona su horario y disponibilidad.
+- Estudiante: Consulta horarios y ofertas de materias.
+*(Las credenciales iniciales de cada entorno deben ser configuradas en las variables de entorno o mediante el seeder)*
 
-Profesor
-Correo: profe@unach.mx
-Contraseña: 123456
-
-# Recuerden levantar el backend primero y despues el frontend para probar el inicio de sesion
-
-12/10/2025
-# instalar
-npm install bcrypt jsonwebtoken axios
-
-**Ejecutar**
-INSERT INTO usuarios (email, password, rol_id) 
-VALUES ('admin@unach.mx', '$2b$10$FCAhKuP1XlzHSgWDcKMwj.uQS2A2WhSTuLobPbdldayZsh14Y2I.G', 1)
-ON CONFLICT (email) DO UPDATE SET password = '$2b$10$FCAhKuP1XlzHSgWDcKMwj.uQS2A2WhSTuLobPbdldayZsh14Y2I.G';
-
-INSERT INTO usuarios (email, password, rol_id) 
-VALUES ('profe@unach.mx', '$2b$10$FCAhKuP1XlzHSgWDcKMwj.uQS2A2WhSTuLobPbdldayZsh14Y2I.G', 2)
-ON CONFLICT (email) DO UPDATE SET password = '$2b$10$FCAhKuP1XlzHSgWDcKMwj.uQS2A2WhSTuLobPbdldayZsh14Y2I.G';
+# Recuerden levantar el backend primero y después el frontend para probar el inicio de sesión
 
 
 
