@@ -4,7 +4,7 @@ import { dbConnection } from '../config/database.js';
 async function findUserByEmail(email) {
     try {
         const sql = `
-            SELECT u.usuario_id, u.email, u.password, r.nombre_rol
+            SELECT u.usuario_id, u.email, u.password_hash, r.nombre_rol
             FROM usuarios u
             JOIN roles r ON r.rol_id = u.rol_id
             WHERE u.email = $1

@@ -16,6 +16,7 @@ const RecoveryForm = () => {
     requestReason: '',
   });
 
+  const { notify } = useToast();
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,13 +25,12 @@ const RecoveryForm = () => {
       [name]: value,
     }));
   };
-
+  
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const { notify } = useToast();
     
     try {
       await crearSolicitudRecuperacion(
