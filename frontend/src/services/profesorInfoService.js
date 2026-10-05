@@ -1,26 +1,32 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
-const API_URL = 'http://localhost:3000/api';
-
-/**
- * Obtener información completa del profesor para asignación de horarios
- * Incluye: disponibilidad, preferencias y materias
- */
-const obtenerInfoHorariosProfesor = async (profesorId) => {
-    const response = await axios.get(`${API_URL}/profesores/${profesorId}/info-horarios`);
+const obtenerProfesorInfo = async (profesorId) => {
+    const response = await apiClient.get(`/profesor/${profesorId}/info`);
     return response.data;
 };
 
-/**
- * Validar si un profesor puede impartir una materia específica
- * Retorna si la materia está en el perfil del profesor
- */
+const actualizarProfesorInfo = async (profesorId, datos) => {
+    const response = await apiClient.put(`/profesor/${profesorId}/info`, datos);
+    return response.data;
+};
+
+const obtenerInfoHorariosProfesor = async (profesorId) => {
+    const response = await apiClient.get(`/profesores/${profesorId}/info-horarios`);
+    return response.data;
+};
+
 const validarProfesorMateria = async (profesorId, materiaId) => {
-    const response = await axios.post(`${API_URL}/horarios/validar-profesor-materia`, {
+    const response = await apiClient.post('/horarios/validar-profesor-materia', {
         profesorId,
         materiaId
     });
     return response.data;
 };
 
-export { obtenerInfoHorariosProfesor, validarProfesorMateria };
+export {
+    obtenerProfesorInfo,
+    actualizarProfesorInfo,
+    obtenerInfoHorariosProfesor,
+    validarProfesorMateria
+};
+

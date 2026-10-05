@@ -1,12 +1,10 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api';
+import apiClient from './apiClient';
 
 /**
  * Obtener todos los horarios
  */
 const obtenerHorarios = async () => {
-    const response = await axios.get(`${API_URL}/horarios`);
+    const response = await apiClient.get('/horarios');
     return response.data;
 };
 
@@ -14,7 +12,7 @@ const obtenerHorarios = async () => {
  * Obtener horarios de un profesor específico
  */
 const obtenerHorariosProfesor = async (profesorId) => {
-    const response = await axios.get(`${API_URL}/horarios/profesor/${profesorId}`);
+    const response = await apiClient.get(`/horarios/profesor/${profesorId}`);
     return response.data;
 };
 
@@ -22,7 +20,7 @@ const obtenerHorariosProfesor = async (profesorId) => {
  * Crear un nuevo horario
  */
 const crearHorario = async (horarioData) => {
-    const response = await axios.post(`${API_URL}/horarios`, horarioData);
+    const response = await apiClient.post('/horarios', horarioData);
     return response.data;
 };
 
@@ -30,7 +28,7 @@ const crearHorario = async (horarioData) => {
  * Actualizar un horario existente
  */
 const actualizarHorario = async (horarioId, horarioData) => {
-    const response = await axios.put(`${API_URL}/horarios/${horarioId}`, horarioData);
+    const response = await apiClient.put(`/horarios/${horarioId}`, horarioData);
     return response.data;
 };
 
@@ -38,7 +36,7 @@ const actualizarHorario = async (horarioId, horarioData) => {
  * Eliminar un horario
  */
 const eliminarHorario = async (horarioId) => {
-    const response = await axios.delete(`${API_URL}/horarios/${horarioId}`);
+    const response = await apiClient.delete(`/horarios/${horarioId}`);
     return response.data;
 };
 

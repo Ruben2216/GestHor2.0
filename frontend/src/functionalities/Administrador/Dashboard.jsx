@@ -7,6 +7,8 @@ import { HorarioPDFExporter } from "../../utils/pdfExportService";
 import { HorarioExcelExporter } from "../../utils/excelExportService";
 import usePageTitle from "../../hooks/usePageTitle";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 import { MdDashboardCustomize } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import { FaClock, FaFilePdf, FaFileExcel, FaChalkboardTeacher, FaGraduationCap, FaSchool, FaRegCalendarCheck } from "react-icons/fa";
@@ -88,7 +90,7 @@ function ScheduleTable() {
     (async () => {
       try {
         setError(null);
-        const r = await fetch("http://localhost:3000/api/docentes");
+        const r = await fetch(`${API_URL}/docentes`);
         if (!r.ok) throw new Error("No se pudieron cargar los docentes.");
         const data = await r.json();
         const lista = Array.isArray(data) ? data : data.docentes || [];
@@ -110,7 +112,7 @@ function ScheduleTable() {
     let abort = false;
     (async () => {
       try {
-        const r = await fetch('http://localhost:3000/api/lugares');
+        const r = await fetch(`${API_URL}/lugares`);
         if (!r.ok) throw new Error('No se pudieron cargar los lugares.');
         const json = await r.json();
         const estructura = Array.isArray(json) ? json : json.lugares || json;
@@ -169,7 +171,7 @@ function ScheduleTable() {
         setError(null);
 
         const resp = await fetch(
-          `http://localhost:3000/api/horarios/profesor/${encodeURIComponent(
+          `${API_URL}/horarios/profesor/${encodeURIComponent(
             profesorSel.profesor_id
           )}`
         );
@@ -372,7 +374,7 @@ function ScheduleTable() {
               setSalonHorarios([]);
               if (val) {
                 try {
-                  const resp = await fetch(`http://localhost:3000/api/horarios/salon/${encodeURIComponent(val)}`);
+                  const resp = await fetch(`${API_URL}/horarios/salon/${encodeURIComponent(val)}`);
                   if (!resp.ok) throw new Error('No se pudieron obtener los horarios del salón');
                   const json = await resp.json();
                   const rows = Array.isArray(json?.horarios) ? json.horarios : [];
@@ -616,7 +618,7 @@ export default function Dashboard() {
           obtenerEstadisticasCarreras(),
         ]);
 
-        const respLugares = await fetch("http://localhost:3000/api/lugares");
+        const respLugares = await fetch(`${API_URL}/lugares`);
         const dataLugares = await respLugares.json();
         const estructura = Array.isArray(dataLugares)
           ? dataLugares
@@ -629,7 +631,7 @@ export default function Dashboard() {
           }
         }
 
-        const respHorarios = await fetch("http://localhost:3000/api/horarios");
+        const respHorarios = await fetch(`${API_URL}/horarios`);
         const dataHorarios = await respHorarios.json();
         const totalActivos = Array.isArray(dataHorarios)
           ? dataHorarios.length

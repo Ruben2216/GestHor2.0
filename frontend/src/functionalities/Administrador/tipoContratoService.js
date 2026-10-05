@@ -1,24 +1,21 @@
-import axios from 'axios';
+import apiClient from '../../services/apiClient';
 
-const API_URL = 'http://localhost:3000/api';
+export async function obtenerTiposContrato() {
+    const res = await apiClient.get('/tipos-contrato');
+    return res.data;
+}
 
-const obtenerTiposContrato = async () => {
-	const response = await axios.get(`${API_URL}/tipos-contrato`);
-	// Aceptamos que el backend devuelva directamente un arreglo o un objeto { tiposContrato: [...] }
-	if (Array.isArray(response.data)) {
-		return { tiposContrato: response.data };
-	}
-	return response.data;
-};
+export async function crearTipoContrato(data) {
+    const res = await apiClient.post('/tipos-contrato', data);
+    return res.data;
+}
 
-const crearTipoContrato = async (payload) => {
-	const response = await axios.post(`${API_URL}/tipos-contrato`, payload);
-	return response.data;
-};
+export async function actualizarTipoContrato(id, data) {
+    const res = await apiClient.put(`/tipos-contrato/${id}`, data);
+    return res.data;
+}
 
-const actualizarTipoContrato = async (id, payload) => {
-	const response = await axios.put(`${API_URL}/tipos-contrato/${id}`, payload);
-	return response.data;
-};
-
-export { obtenerTiposContrato, crearTipoContrato, actualizarTipoContrato };
+export async function eliminarTipoContrato(id) {
+    const res = await apiClient.delete(`/tipos-contrato/${id}`);
+    return res.data;
+}

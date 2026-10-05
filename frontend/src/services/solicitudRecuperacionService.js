@@ -1,9 +1,7 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api';
+import apiClient from './apiClient';
 
 const crearSolicitudRecuperacion = async (email, motivo) => {
-    const response = await axios.post(`${API_URL}/solicitudes-recuperacion`, {
+    const response = await apiClient.post('/solicitudes-recuperacion', {
         email,
         motivo
     });
@@ -11,32 +9,32 @@ const crearSolicitudRecuperacion = async (email, motivo) => {
 };
 
 const obtenerSolicitudesPendientes = async () => {
-    const response = await axios.get(`${API_URL}/solicitudes-recuperacion/pendientes`);
+    const response = await apiClient.get('/solicitudes-recuperacion/pendientes');
     return response.data;
 };
 
 const obtenerTodasSolicitudes = async () => {
-    const response = await axios.get(`${API_URL}/solicitudes-recuperacion`);
+    const response = await apiClient.get('/solicitudes-recuperacion');
     return response.data;
 };
 
 const obtenerEstadisticasSolicitudes = async () => {
-    const response = await axios.get(`${API_URL}/solicitudes-recuperacion/estadisticas`);
+    const response = await apiClient.get('/solicitudes-recuperacion/estadisticas');
     return response.data;
 };
 
 const resolverSolicitud = async (solicitudId) => {
-    const response = await axios.put(`${API_URL}/solicitudes-recuperacion/${solicitudId}/resolver`);
+    const response = await apiClient.put(`/solicitudes-recuperacion/${solicitudId}/resolver`);
     return response.data;
 };
 
 const regenerarPassword = async (solicitudId) => {
-    const response = await axios.post(`${API_URL}/solicitudes-recuperacion/${solicitudId}/regenerar-password`);
+    const response = await apiClient.post(`/solicitudes-recuperacion/${solicitudId}/regenerar-password`);
     return response.data;
 };
 
 const obtenerActividadesRecientes = async (limite = 10) => {
-    const response = await axios.get(`${API_URL}/solicitudes-recuperacion/actividades`, {
+    const response = await apiClient.get('/solicitudes-recuperacion/actividades', {
         params: { limite }
     });
     return response.data;
