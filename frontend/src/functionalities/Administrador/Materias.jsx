@@ -14,6 +14,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import { MdLibraryBooks, MdAddCircle, MdEdit, MdDelete, MdCancel } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import { FaRegQuestionCircle } from "react-icons/fa";
+import { usePermissions } from "../../hooks/usePermissions";
 
 function emptyForm() {
     return {
@@ -22,6 +23,11 @@ function emptyForm() {
 }
 
 export default function Materias() {
+    const { canDeleteMaterias, canEditMaterias, canCreateMaterias, isAdmin, isEditor } = usePermissions();
+    const canDelete = isAdmin || canDeleteMaterias;
+    const canEdit = isAdmin || isEditor || canEditMaterias;
+    const canCreate = isAdmin || isEditor || canCreateMaterias;
+
     const [materias, setMaterias] = useState([]);
     const [form, setForm] = useState(emptyForm());
     const [editingId, setEditingId] = useState(null);
@@ -233,22 +239,26 @@ export default function Materias() {
                                                 )}
                                             </div>
                                             <div className={styles['materias__itemActions']}>
-                                                <button
-                                                    className="link-btn"
-                                                    onClick={() => onEdit(m)}
-                                                    disabled={cargando}
-                                                    style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-                                                >
-                                                    <MdEdit aria-hidden="true" /> Editar
-                                                </button>
-                                                <button
-                                                    className="link-btn link-btn--danger"
-                                                    onClick={() => onDelete(m.materia_id)}
-                                                    disabled={cargando}
-                                                    style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-                                                >
-                                                    <MdDelete aria-hidden="true" /> Eliminar
-                                                </button>
+                                                {canEdit && (
+                                                    <button
+                                                        className="link-btn"
+                                                        onClick={() => onEdit(m)}
+                                                        disabled={cargando}
+                                                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                                                    >
+                                                        <MdEdit aria-hidden="true" /> Editar
+                                                    </button>
+                                                )}
+                                                {canDelete && (
+                                                    <button
+                                                        className="link-btn link-btn--danger"
+                                                        onClick={() => onDelete(m.materia_id)}
+                                                        disabled={cargando}
+                                                        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                                                    >
+                                                        <MdDelete aria-hidden="true" /> Eliminar
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
