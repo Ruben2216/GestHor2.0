@@ -171,11 +171,11 @@ const regenerarPasswordController = async (req, res) => {
             `Nueva contraseña enviada a ${nombreCompleto}`
         );
 
-        console.log('�📧 Enviando correo...');
+        console.log('📧 Enviando correo...');
         enviarCorreoRecuperacion({
             email: usuario.email,
             nombreCompleto: nombreCompleto,
-            nuevoToken
+            token: nuevoToken
         }).then(resultado => {
             if (resultado.success) {
                 console.log(`✅ Correo de recuperación enviado a ${usuario.email}`);
