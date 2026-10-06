@@ -40,4 +40,4 @@ async function seed() {
 seed().catch(err => {
   console.error('Error al insertar usuarios:', err);
   process.exit(1);
-});
+}); 
