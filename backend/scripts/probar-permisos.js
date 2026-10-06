@@ -1,4 +1,5 @@
 // Pruebas de criterios de aceptación - Módulo 2 (roles, permisos y protección)
+import 'dotenv/config';
 
 const API = process.env.API_URL || 'http://localhost:3000/api';
 const PASSWORD = process.env.TEST_USER_PASSWORD || 'PlaceholderTestPassword#123';
