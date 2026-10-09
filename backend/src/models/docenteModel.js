@@ -86,8 +86,8 @@ const insertarDocente = async (docente) => {
         // Crear usuario con rol profesor (rol_id = 2)
         // El login lee password_hash; password (legacy, NOT NULL) se llena con el mismo hash
         const usuario = await dbConnection.one(
-            `INSERT INTO usuarios (email, password, password_hash, nombre, rol_id)
-             VALUES ($1, $2, $2, $3, 2)
+            `INSERT INTO usuarios (email, password_hash, nombre, rol_id)
+             VALUES ($1, $2, $3, 2)
              RETURNING usuario_id`,
             [email, hashedToken, `${nombres} ${apellidos}`]
         );

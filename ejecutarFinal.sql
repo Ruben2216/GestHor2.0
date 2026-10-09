@@ -2029,6 +2029,10 @@ COPY public.rol_permisos (rol_id, permiso_id) FROM stdin;
 4	33
 4	34
 4	38
+1	38
+1	39
+1	40
+1	41
 \.
 
 
@@ -2266,7 +2270,7 @@ COPY public.usuarios (usuario_id, email, rol_id, fecha_creacion, password_hash, 
 39	test.estudiante@unach.mx	3	2026-10-05 19:39:50.674413-06	$2b$10$IAXr/wbQBhY0zs1yDVlM1ezfeAi9dYmfDjAPs3y8iMcBE9p/peOJW	Test Estudiante	t	2026-10-08 23:59:24.812775-06	2026-10-08 04:09:09.001814-06	f
 40	test.editor@unach.mx	4	2026-10-05 19:39:50.674413-06	$2b$10$IAXr/wbQBhY0zs1yDVlM1ezfeAi9dYmfDjAPs3y8iMcBE9p/peOJW	Test Editor	t	2026-10-08 23:59:24.812775-06	2026-10-08 04:07:00.867873-06	f
 32	jose.clemente48@unach.mx	1	2025-10-26 05:55:07.102831-06	$2b$10$3CJYMH2ZzX07v3I2x/vRl.Bnjgl2FSsqiYg4XSltxeY.C3JQhqRl6	\N	t	2026-10-05 19:16:39.90578-06	\N	f
-35	test.admin@unach.mx	1	2026-10-03 03:24:20.742968-06	$2b$12$WeDbtXDqq/cl/hJQQ8P00.eRNbZxo1k81zPREyzcFfC1pL6qT3WWO	Test Administrador	t	2026-10-08 23:59:32.530801-06	2026-10-08 23:59:32.530801-06	t
+35	test.admin@unach.mx	1	2026-10-03 03:24:20.742968-06	$2b$10$IAXr/wbQBhY0zs1yDVlM1ezfeAi9dYmfDjAPs3y8iMcBE9p/peOJW	Test Administrador	t	2026-10-08 23:59:32.530801-06	2026-10-08 23:59:32.530801-06	t
 2	admin@unach.mx	1	2025-10-12 00:52:53.83231-06	$2b$10$FCAhKuP1XlzHSgWDcKMwj.uQS2A2WhSTuLobPbdldayZsh14Y2I.G	\N	t	2026-10-09 00:08:36.625665-06	2026-10-09 00:08:36.625665-06	f
 31	josttravieso@gmail.com	2	2025-10-26 05:48:51.991687-06	$2b$10$VgHKWlXeYrA01I8VCa/fSeWP1bl5D7S7gEloQkko8vDhFggNJbyBC	\N	t	2026-10-09 00:09:02.649843-06	2026-10-09 00:09:02.649843-06	f
 34	test@test.com	1	2026-10-02 23:52:43.874742-06	$2b$12$yAtMkuextHpkZ4956PYyiOkOlT9GTOVsSJwRvrC1txZspe9xKmQAO	Usuario Test	t	2026-10-02 23:52:43.874742-06	2026-10-03 03:18:54.716752-06	f
