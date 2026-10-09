@@ -37,8 +37,8 @@ export async function createGoogleProfessor({ email, passwordHash, nombre, nombr
     }
 
     const createdUser = await transaction.oneOrNone(`
-      INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, email_verificado)
-      VALUES ($1, $2, $2, $3, $4, TRUE, TRUE)
+      INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, email_verificado)
+      VALUES ($1, $2, $3, $4, TRUE, TRUE)
       ON CONFLICT (email) DO NOTHING
       RETURNING usuario_id
     `, [email, passwordHash, nombre, role.rol_id]);

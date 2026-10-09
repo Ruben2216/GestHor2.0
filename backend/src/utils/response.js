@@ -89,6 +89,10 @@ export function handleError(res, error, defaultMessage = 'Ocurrió un error inte
     return sendError(res, 'Token expirado. Inicie sesión nuevamente.', AUTH_CONSTANTS.ERROR_CODES.TOKEN_EXPIRED, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
   }
 
+  if (error.name === 'TokenReusedError') {
+    return sendError(res, 'Token reutilizado detectado - sesión invalidada', AUTH_CONSTANTS.ERROR_CODES.TOKEN_REUSED, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
+  }
+
   if (error.name === 'JsonWebTokenError') {
     return sendError(res, 'Token inválido', AUTH_CONSTANTS.ERROR_CODES.INVALID_TOKEN, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
   }
