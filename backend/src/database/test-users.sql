@@ -3,14 +3,13 @@
 -- ============================================================================
 -- Ejecutar en base de datos de DESARROLLO únicamente
 -- NO usar en producción
--- Requiere: ejecutarFinal.sql, 001_auth_module.sql y 002_roles_permisos.sql
 -- ============================================================================
 
--- Hash bcrypt de ejemplo para desarrollo local (Reemplazar según políticas del entorno)
--- La columna legacy "password" es NOT NULL en ejecutarFinal.sql, por eso se llena con el mismo hash.
+-- Mismo hash bcrypt de desarrollo que traen los usuarios de prueba en ejecutarFinal.sql
+-- (la contraseña se configura en TEST_USER_PASSWORD de backend/.env)
 
-INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
-SELECT v.email, h.hash, h.hash, v.nombre, r.rol_id, TRUE, NOW(), TRUE
+INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, fecha_creacion, email_verificado)
+SELECT v.email, h.hash, v.nombre, r.rol_id, TRUE, NOW(), TRUE
 FROM (VALUES
     ('test.admin@unach.mx',      'Test Administrador', 'administrador'),
     ('test.editor@unach.mx',     'Test Editor',        'editor'),
