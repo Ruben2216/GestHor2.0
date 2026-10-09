@@ -55,7 +55,7 @@ async function main() {
   const alumno = await login('test.estudiante@unach.mx');
 
   console.log('\n== Endpoint de permisos del usuario');
-  for (const [nombre, u] of [['administrador', admin], ['editor (docente)', editor], ['profesor', profe], ['alumno (estudiante)', alumno]]) {
+  for (const [nombre, u] of [['administrador', admin], ['editor', editor], ['profesor', profe], ['alumno (estudiante)', alumno]]) {
     const res = await fetch(`${API}/auth/permisos`, { headers: { Authorization: `Bearer ${u.token}` } });
     const body = await res.json();
     total++;

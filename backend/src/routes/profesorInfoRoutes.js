@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/profesores/:profesorId/info-horarios
  * Obtiene disponibilidad, preferencias y materias del profesor
  */
-router.get('/profesores/:profesorId/info-horarios', authorizeSelfOr('profesorId', 'docentes:leer'), obtenerInfoHorariosProfesor);
+router.get('/profesores/:profesorId/info-horarios', authorizeSelfOr('profesorId', 'editores:leer'), obtenerInfoHorariosProfesor);
 
 /**
  * POST /api/horarios/validar-profesor-materia

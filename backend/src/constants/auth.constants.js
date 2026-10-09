@@ -50,7 +50,8 @@ export const AUTH_CONSTANTS = {
   },
   ROLES: {
     ADMIN: 'administrador',
-    TEACHER: 'docente',
+    EDITOR: 'editor',
+    TEACHER: 'profesor',
     STUDENT: 'estudiante',
   },
 };

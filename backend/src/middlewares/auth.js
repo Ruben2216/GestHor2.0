@@ -97,8 +97,8 @@ export const requirePermission = (...permissions) => {
       const userPermissions = await loadPermissions(req);
 
       const expandedPermissions = permissions.flatMap(p => {
-        if (p.startsWith('docentes:')) return [p, p.replace('docentes:', 'profesores:')];
-        if (p.startsWith('profesores:')) return [p, p.replace('profesores:', 'docentes:')];
+        if (p.startsWith('editores:')) return [p, p.replace('editores:', 'profesores:')];
+        if (p.startsWith('profesores:')) return [p, p.replace('profesores:', 'editores:')];
         return [p];
       });
 

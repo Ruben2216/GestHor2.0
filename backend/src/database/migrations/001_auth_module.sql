@@ -23,8 +23,9 @@ CREATE TABLE IF NOT EXISTS roles (
 -- Insertar roles por defecto
 INSERT INTO roles (nombre_rol, descripcion) VALUES
     ('administrador', 'Administrador del sistema con acceso completo'),
-    ('docente', 'Docente con acceso a horarios y materias asignadas'),
-    ('estudiante', 'Estudiante con acceso a consultar horarios')
+    ('editor', 'Editor: crea, modifica y elimina horarios, materias, carreras y lugares. No administra usuarios ni roles'),
+    ('profesor', 'Profesor: consulta su horario y materias; modifica solo su disponibilidad, preferencias y materias'),
+    ('estudiante', 'Estudiante: solo consulta horarios, materias, carreras, lugares y periodos')
 ON CONFLICT (nombre_rol) DO NOTHING;
 
 -- ============================================================================
@@ -44,10 +45,10 @@ INSERT INTO permisos (clave, nombre, descripcion) VALUES
     ('horarios:crear', 'Crear horarios', 'Permite crear nuevos horarios'),
     ('horarios:editar', 'Editar horarios', 'Permite modificar horarios existentes'),
     ('horarios:eliminar', 'Eliminar horarios', 'Permite eliminar horarios'),
-    ('docentes:leer', 'Leer docentes', 'Permite consultar lista de docentes'),
-    ('docentes:crear', 'Crear docentes', 'Permite registrar nuevos docentes'),
-    ('docentes:editar', 'Editar docentes', 'Permite modificar datos de docentes'),
-    ('docentes:eliminar', 'Eliminar docentes', 'Permite dar de baja docentes'),
+    ('editores:leer', 'Leer editores', 'Permite consultar lista de editores'),
+    ('editores:crear', 'Crear editores', 'Permite registrar nuevos editores'),
+    ('editores:editar', 'Editar editores', 'Permite modificar datos de editores'),
+    ('editores:eliminar', 'Eliminar editores', 'Permite dar de baja editores'),
     ('materias:leer', 'Leer materias', 'Permite consultar materias'),
     ('materias:crear', 'Crear materias', 'Permite crear nuevas materias'),
     ('materias:editar', 'Editar materias', 'Permite modificar materias'),
@@ -79,12 +80,12 @@ FROM roles r, permisos p
 WHERE r.nombre_rol = 'administrador'
 ON CONFLICT DO NOTHING;
 
--- Asignar permisos básicos al rol docente
+-- Asignar permisos básicos al rol editor
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.rol_id, p.permiso_id
 FROM roles r, permisos p
-WHERE r.nombre_rol = 'docente'
-  AND p.clave IN ('horarios:leer', 'horarios:crear', 'horarios:editar', 'docentes:leer', 'materias:leer')
+WHERE r.nombre_rol = 'editor'
+  AND p.clave IN ('horarios:leer', 'horarios:crear', 'horarios:editar', 'editores:leer', 'materias:leer')
 ON CONFLICT DO NOTHING;
 
 -- Asignar permisos básicos al rol estudiante

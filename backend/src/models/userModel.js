@@ -1,5 +1,9 @@
 import { dbConnection } from '../config/database.js';
 
+// DEPRECATED: Use userRepository/userService instead. Legacy recovery flow only.
+// This module is kept for backward compatibility with solicitudRecuperacionController.js
+// but should not be used for new authentication code.
+
 // Buscar usuario por email y devolver datos incluyendo hash de password
 async function findUserByEmail(email) {
     try {

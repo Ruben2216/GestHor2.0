@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import apiClient, { sanitizeApiError } from '../services/apiClient';
+import apiClient from '../services/apiClient';
 import authStorage from '../services/authStorage';
 
 const AuthContext = createContext(null);
@@ -117,10 +117,12 @@ export function AuthProvider({ children }) {
         role: getNormalizedRole(userData.rol),
       };
     } catch (error) {
-      const sanitized = sanitizeApiError(error);
+      // El error ya viene sanitizado del interceptor de axios (sanitizeApiError)
+      // Tiene estructura: { status, message, code, details, originalError }
+      const message = error?.message || 'No se pudo iniciar sesión. Verifica tus datos de acceso.';
       return {
         success: false,
-        message: sanitized.message,
+        message,
       };
     }
   };

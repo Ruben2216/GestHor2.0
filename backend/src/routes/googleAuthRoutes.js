@@ -7,9 +7,14 @@ const router = express.Router();
 // Ruta para iniciar autenticación con Google
 router.get(
     '/google',
-    passport.authenticate('google', { 
-        scope: ['profile', 'email'] 
-    })
+    (req, res, next) => {
+        const prompt = req.query.prompt || 'select_account';
+        passport.authenticate('google', { 
+            scope: ['profile', 'email'],
+            prompt,
+            access_type: 'offline'
+        })(req, res, next);
+    }
 );
 
 // Ruta de callback después de autenticarse con Google

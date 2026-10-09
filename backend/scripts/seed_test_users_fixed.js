@@ -12,7 +12,7 @@ async function seed() {
       (1, 'administrador', 'Acceso total al sistema'),
       (2, 'profesor', 'Consulta su horario y materias'),
       (3, 'estudiante', 'Alumno: solo consulta horarios y materias'),
-      (4, 'docente', 'Editor: gestiona contenidos')
+      (4, 'editor', 'Editor: gestiona contenidos')
     ON CONFLICT (rol_id) DO UPDATE SET 
       nombre_rol = EXCLUDED.nombre_rol,
       descripcion = EXCLUDED.descripcion;

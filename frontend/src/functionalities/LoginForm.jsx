@@ -102,7 +102,8 @@ function LoginForm() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    // prompt=select_account fuerza la selección de cuenta aunque haya sesión en Google
+    window.location.href = "http://localhost:3000/api/auth/google?prompt=select_account";
   };
 
   return (

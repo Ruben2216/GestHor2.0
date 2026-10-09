@@ -154,6 +154,7 @@ apiClient.interceptors.response.use(
  * Sanitiza los errores para evitar fugas de información interna hacia la UI
  */
 export function sanitizeApiError(error) {
+  // Si no hay respuesta del servidor (error de red, timeout, CORS)
   if (!error.response) {
     if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
       return {
@@ -161,6 +162,7 @@ export function sanitizeApiError(error) {
         status: 408,
       };
     }
+    // Error de red/CORS - no confundir con error de credenciales
     return {
       message: 'No se pudo establecer conexión con el servidor. Verifica tu conexión a internet.',
       status: 0,
@@ -168,6 +170,7 @@ export function sanitizeApiError(error) {
   }
 
   const { status, data } = error.response;
+  // Priorizar mensaje del backend (ya viene sanitizado del servidor)
   let message = data?.message || data?.error;
 
   // Si el mensaje contiene detalles internos de SQL o rutas del servidor, reemplazar por genérico
@@ -183,6 +186,7 @@ export function sanitizeApiError(error) {
     message = 'Ocurrió un error inesperado al procesar la solicitud.';
   }
 
+  // Fallback solo si el backend NO envió mensaje
   if (!message) {
     switch (status) {
       case 400:

@@ -5,12 +5,12 @@ import { authorize } from "../middlewares/auth.js";
 const router = Router();
 
 // GET /api/tipos-contrato
-router.get('/tipos-contrato', authorize('docentes:leer'), obtenerTiposContratoController);
+router.get('/tipos-contrato', authorize('editores:leer'), obtenerTiposContratoController);
 
 // POST /api/tipos-contrato
-router.post('/tipos-contrato', authorize('docentes:editar'), crearTipoContratoController);
+router.post('/tipos-contrato', authorize('editores:editar'), crearTipoContratoController);
 
 // PUT /api/tipos-contrato/:id
-router.put('/tipos-contrato/:id', authorize('docentes:editar'), actualizarTipoContratoController);
+router.put('/tipos-contrato/:id', authorize('editores:editar'), actualizarTipoContratoController);
 
 export default router;

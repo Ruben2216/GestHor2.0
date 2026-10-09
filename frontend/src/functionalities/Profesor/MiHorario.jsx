@@ -7,12 +7,12 @@ import { HorarioExcelExporter } from "../../utils/excelExportService";
 import { obtenerHorariosProfesor } from "../../services/horarioService";
 import { HorarioPDFExporter } from "../../utils/pdfExportService";
 import { useToast } from "../../components/ui/NotificacionFlotante";
+import { useAuth } from "../../hooks/useAuth";
 const DAYS = ["lunes", "martes", "miercoles", "jueves", "viernes"];
 import usePageTitle from "../../hooks/usePageTitle";
 
 import { MdSchedule } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
-import { cerrarSesion } from "../../services/sessionService";
 import { FaFilePdf, FaFileExcel, FaRegClock } from "react-icons/fa";
 
 const normalize = (s) =>
@@ -26,6 +26,7 @@ export default function MiHorario() {
   usePageTitle("Mi horario");
   const navigate = useNavigate();
   const { notify } = useToast();
+  const { logout } = useAuth();
   const [nombreProfesor, setNombreProfesor] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -199,8 +200,7 @@ export default function MiHorario() {
   };
 
   const handleLogout = async () => {
-    await cerrarSesion();
-    navigate("/login");
+    await logout();
   };
 
   return (
