@@ -5,6 +5,7 @@ import { sendError } from '../utils/response.js';
 import { AUTH_CONSTANTS } from '../constants/auth.constants.js';
 
 export const auth = async (req, res, next) => {
+
   try {
     const authHeader = req.headers.authorization;
 
@@ -133,3 +134,5 @@ export const requireSelfOrPermission = (param, ...permissions) => {
 export const authorize = (...permissions) => [auth, requirePermission(...permissions)];
 
 export const authorizeSelfOr = (param, ...permissions) => [auth, requireSelfOrPermission(param, ...permissions)];
+
+export const authMiddleware = auth;

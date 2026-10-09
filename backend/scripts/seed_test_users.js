@@ -18,7 +18,7 @@ async function seed() {
       descripcion = EXCLUDED.descripcion;
   `);
 
-  // Asegurar usuarios
+  // Asegurar usuarios estándar (Jest)
   await dbConnection.none(`
     INSERT INTO usuarios (email, password, password_hash, rol_id, nombre, activo)
     VALUES 
@@ -33,6 +33,24 @@ async function seed() {
       nombre = EXCLUDED.nombre,
       activo = true;
   `, [hash]);
+
+  // Asegurar usuarios para test:permisos (Módulo 2)
+  const permisosPass = 'PlaceholderTestPassword#123';
+  const permisosHash = await bcrypt.hash(permisosPass, 10);
+  await dbConnection.none(`
+    INSERT INTO usuarios (email, password, password_hash, rol_id, nombre, activo)
+    VALUES 
+      ('test.admin@unach.mx', $1, $1, 1, 'Test Administrador', true),
+      ('test.profe@unach.mx', $1, $1, 2, 'Test Profesor', true),
+      ('test.estudiante@unach.mx', $1, $1, 3, 'Test Estudiante', true),
+      ('test.editor@unach.mx', $1, $1, 4, 'Test Editor', true)
+    ON CONFLICT (email) DO UPDATE SET 
+      password = EXCLUDED.password,
+      password_hash = EXCLUDED.password_hash,
+      rol_id = EXCLUDED.rol_id,
+      nombre = EXCLUDED.nombre,
+      activo = true;
+  `, [permisosHash]);
 
   console.log('Usuarios de prueba listos');
   process.exit(0);
