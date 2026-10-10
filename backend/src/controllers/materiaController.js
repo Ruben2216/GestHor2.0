@@ -208,7 +208,9 @@ const eliminarMateriaController = async (req, res) => {
  */
 const asignarMateriaACarreraController = async (req, res) => {
     try {
-        const { carrera_id, materia_id, numero_semestre } = req.body;
+        const carrera_id = req.body?.carrera_id || req.body?.carreraId || req.params?.carreraId || req.params?.id;
+        const materia_id = req.body?.materia_id || req.body?.materiaId;
+        const numero_semestre = req.body?.numero_semestre || req.body?.semestre;
         
         if (!carrera_id || !materia_id || !numero_semestre) {
             return res.status(400).json({
@@ -217,12 +219,12 @@ const asignarMateriaACarreraController = async (req, res) => {
             });
         }
 
-        const asignacion = await asignarACarrera(carrera_id, materia_id, numero_semestre);
+        const asignacion = await asignarACarrera(Number(carrera_id), Number(materia_id), Number(numero_semestre));
         
         if (asignacion === null) {
             return res.status(409).json({
                 ok: false,
-                mensaje: "La materia ya está asignada a esta carrera"
+                mensaje: "La materia ya está asignada a este semestre de la carrera"
             });
         }
 

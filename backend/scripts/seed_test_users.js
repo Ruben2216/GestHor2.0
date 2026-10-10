@@ -20,14 +20,13 @@ async function seed() {
 
   // Asegurar usuarios estándar (Jest)
   await dbConnection.none(`
-    INSERT INTO usuarios (email, password, password_hash, rol_id, nombre, activo)
+    INSERT INTO usuarios (email, password_hash, rol_id, nombre, activo)
     VALUES 
-      ('admin@unach.mx', $1, $1, 1, 'Administrador UNACH', true),
-      ('profe@unach.mx', $1, $1, 2, 'Profesor UNACH', true),
-      ('alumno@unach.mx', $1, $1, 3, 'Alumno UNACH', true),
-      ('editor@unach.mx', $1, $1, 4, 'Editor UNACH', true)
+      ('admin@unach.mx', $1, 1, 'Administrador UNACH', true),
+      ('profe@unach.mx', $1, 2, 'Profesor UNACH', true),
+      ('alumno@unach.mx', $1, 3, 'Alumno UNACH', true),
+      ('editor@unach.mx', $1, 4, 'Editor UNACH', true)
     ON CONFLICT (email) DO UPDATE SET 
-      password = EXCLUDED.password,
       password_hash = EXCLUDED.password_hash,
       rol_id = EXCLUDED.rol_id,
       nombre = EXCLUDED.nombre,
@@ -38,14 +37,13 @@ async function seed() {
   const permisosPass = 'PlaceholderTestPassword#123';
   const permisosHash = await bcrypt.hash(permisosPass, 10);
   await dbConnection.none(`
-    INSERT INTO usuarios (email, password, password_hash, rol_id, nombre, activo)
+    INSERT INTO usuarios (email, password_hash, rol_id, nombre, activo)
     VALUES 
-      ('test.admin@unach.mx', $1, $1, 1, 'Test Administrador', true),
-      ('test.profe@unach.mx', $1, $1, 2, 'Test Profesor', true),
-      ('test.estudiante@unach.mx', $1, $1, 3, 'Test Estudiante', true),
-      ('test.editor@unach.mx', $1, $1, 4, 'Test Editor', true)
+      ('test.admin@unach.mx', $1, 1, 'Test Administrador', true),
+      ('test.profe@unach.mx', $1, 2, 'Test Profesor', true),
+      ('test.estudiante@unach.mx', $1, 3, 'Test Estudiante', true),
+      ('test.editor@unach.mx', $1, 4, 'Test Editor', true)
     ON CONFLICT (email) DO UPDATE SET 
-      password = EXCLUDED.password,
       password_hash = EXCLUDED.password_hash,
       rol_id = EXCLUDED.rol_id,
       nombre = EXCLUDED.nombre,

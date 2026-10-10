@@ -8,6 +8,9 @@ const router = express.Router();
 router.get(
     '/google',
     (req, res, next) => {
+        if (!passport._strategies?.google) {
+            return res.status(503).json({ ok: false, message: 'Autenticación con Google no está configurada en este entorno.' });
+        }
         const prompt = req.query.prompt || 'select_account';
         passport.authenticate('google', { 
             scope: ['profile', 'email'],

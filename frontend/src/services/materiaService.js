@@ -30,8 +30,19 @@ const obtenerMateriasPorCarrera = async (carreraId) => {
     return response.data;
 };
 
-const asignarMateriaACarrera = async (carreraId, data) => {
-    const response = await apiClient.post(`/carreras/${carreraId}/materias`, data);
+const asignarMateriaACarrera = async (carreraId, materiaId, semestre) => {
+    const payload = (typeof materiaId === 'object' && materiaId !== null)
+        ? {
+            carrera_id: Number(carreraId),
+            materia_id: Number(materiaId.materia_id || materiaId.id),
+            numero_semestre: Number(materiaId.numero_semestre || materiaId.semestre || semestre)
+        }
+        : {
+            carrera_id: Number(carreraId),
+            materia_id: Number(materiaId),
+            numero_semestre: Number(semestre)
+        };
+    const response = await apiClient.post(`/carreras/${carreraId}/materias`, payload);
     return response.data;
 };
 

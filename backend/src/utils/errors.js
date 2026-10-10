@@ -67,6 +67,13 @@ export class TokenReusedError extends AppError {
   }
 }
 
+export class TooManyRequestsError extends AppError {
+  constructor(message = 'Demasiadas solicitudes. Por favor, intente nuevamente más tarde.') {
+    super(message, 'RATE_LIMIT_EXCEEDED', 429);
+    this.name = 'TooManyRequestsError';
+  }
+}
+
 export function isAppError(error) {
   return error instanceof AppError;
 }

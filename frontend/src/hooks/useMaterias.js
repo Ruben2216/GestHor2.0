@@ -31,7 +31,7 @@ export function useMaterias() {
             notify({ type: 'success', message: 'Materia asignada exitosamente' });
         } catch (error) {
             console.error("Error al asignar materia:", error);
-            notify({ type: 'error', message: error.response?.data?.mensaje || 'Error al asignar materia' });
+            notify({ type: 'error', message: error.message || error.response?.data?.mensaje || 'Error al asignar materia' });
             throw error;
         } finally {
             setCargando(false);
@@ -48,7 +48,7 @@ export function useMaterias() {
             return true;
         } catch (error) {
             console.error("Error al desasignar materia:", error);
-            notify({ type: 'error', message: 'Error al desasignar materia' });
+            notify({ type: 'error', message: error.message || error.response?.data?.mensaje || 'Error al desasignar materia' });
             return false;
         } finally {
             setCargando(false);

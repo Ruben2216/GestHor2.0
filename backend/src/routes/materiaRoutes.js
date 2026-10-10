@@ -27,6 +27,9 @@ router.delete('/materias/:id', authorize('materias:eliminar'), eliminarMateriaCo
 
 // Rutas para asignar/desasignar materias a carreras (plan de estudios)
 router.post('/materias/asignar', authorize('materias:editar'), asignarMateriaACarreraController);
+router.post('/carreras/:carreraId/materias', authorize('materias:editar'), asignarMateriaACarreraController);
+router.get('/carreras/:carreraId/materias', authorize('materias:leer'), obtenerMateriasPorCarreraController);
 router.delete('/materias/desasignar/:carreraId/:materiaId/:semestre', authorize('materias:editar'), desasignarMateriaDeCarreraController);
+router.delete('/carreras/:carreraId/materias/:materiaId/:semestre', authorize('materias:editar'), desasignarMateriaDeCarreraController);
 
 export default router;

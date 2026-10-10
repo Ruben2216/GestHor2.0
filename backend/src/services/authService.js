@@ -5,17 +5,57 @@ import * as refreshTokenRepository from '../repositories/refreshTokenRepository.
 import * as sessionService from './sessionService.js';
 import * as passwordService from './passwordService.js';
 import { hashToken, hashPassword, comparePassword, generateRandomToken } from '../utils/crypto.js';
-import { UnauthorizedError, ValidationError, TokenReusedError, NotFoundError } from '../utils/errors.js';
+import { UnauthorizedError, ValidationError, TokenReusedError, NotFoundError, TooManyRequestsError } from '../utils/errors.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
 
 // Hash de una contraseña aleatoria: se compara contra él cuando el correo no existe,
 // para que la respuesta tarde lo mismo y no se pueda saber qué correos están registrados
 const HASH_FICTICIO = '$2b$12$1se3P7gANhL/i7jkod1IZOpfv3yvxJ7pAZe0QYF.xY3phbZaSZUpO';
 
+// Bloqueo temporal de cuentas tras múltiples intentos fallidos
+const failedLoginAttempts = new Map();
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
+
+function checkAccountLockout(email) {
+  const key = email.toLowerCase();
+  const record = failedLoginAttempts.get(key);
+  if (!record) return;
+
+  if (record.lockedUntil) {
+    if (Date.now() < record.lockedUntil) {
+      const minutesRemaining = Math.max(1, Math.ceil((record.lockedUntil - Date.now()) / (60 * 1000)));
+      throw new TooManyRequestsError(
+        `Cuenta bloqueada temporalmente por exceso de intentos fallidos. Intente nuevamente en ${minutesRemaining} minuto(s).`
+      );
+    } else {
+      failedLoginAttempts.delete(key);
+    }
+  }
+}
+
+function recordFailedAttempt(email) {
+  const key = email.toLowerCase();
+  const record = failedLoginAttempts.get(key) || { count: 0, lockedUntil: null };
+  record.count += 1;
+
+  if (record.count >= MAX_FAILED_ATTEMPTS) {
+    record.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+  }
+  failedLoginAttempts.set(key, record);
+}
+
+function clearFailedAttempts(email) {
+  failedLoginAttempts.delete(email.toLowerCase());
+}
+
 export async function login(email, password, ipOrigen, userAgent) {
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  checkAccountLockout(normalizedEmail);
+
   let user = null;
   try {
-    user = await userService.findByEmail(email);
+    user = await userService.findByEmail(normalizedEmail);
   } catch (error) {
     if (!(error instanceof NotFoundError)) throw error;
   }
@@ -24,9 +64,11 @@ export async function login(email, password, ipOrigen, userAgent) {
 
   // Mismo mensaje si el correo no existe o si la contraseña es incorrecta
   if (!user?.password_hash || !passwordCorrecta) {
+    recordFailedAttempt(normalizedEmail);
     throw new UnauthorizedError(RESPONSE_MESSAGES.INVALID_CREDENTIALS, AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS);
   }
 
+  clearFailedAttempts(normalizedEmail);
   return createUserSession(user, ipOrigen, userAgent);
 }
 
