@@ -21,11 +21,9 @@ export default function MisMaterias() {
     const [misMaterias, setMisMaterias] = useState([]);
     const [materiasDisponibles, setMateriasDisponibles] = useState([]);
     const [cargando, setCargando] = useState(false);
-    const [nombreProfesor, setNombreProfesor] = useState("");
-
-    // Obtener profesor_id del usuario logueado
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const profesorId = user.usuario_id;
+    const profesorId = user.usuario_id || user.id;
+    const [nombreProfesor, setNombreProfesor] = useState(user.nombre || "");
 
     useEffect(() => {
         if (profesorId) {
@@ -40,14 +38,23 @@ export default function MisMaterias() {
     const cargarDatos = async () => {
         try {
             setCargando(true);
-            const [dataProfesor, dataNombre] = await Promise.all([
+            const [materiasResult, nombreResult] = await Promise.allSettled([
                 obtenerMateriasProfesor(profesorId),
                 obtenerNombreProfesor(profesorId)
             ]);
-            setMisMaterias(dataProfesor.materias || []);
 
-            if (dataNombre.profesor) {
-                setNombreProfesor(`${dataNombre.profesor.nombres} ${dataNombre.profesor.apellidos}`);
+            if (materiasResult.status === 'fulfilled') {
+                setMisMaterias(materiasResult.value?.materias || []);
+            } else {
+                console.error("Error al obtener materias:", materiasResult.reason);
+                notify({ type: 'error', message: 'Error al cargar las materias' });
+            }
+
+            if (nombreResult.status === 'fulfilled' && nombreResult.value?.profesor) {
+                const { nombres, apellidos } = nombreResult.value.profesor;
+                setNombreProfesor(`${nombres} ${apellidos}`.trim());
+            } else if (user.nombre) {
+                setNombreProfesor(user.nombre);
             }
         } catch (error) {
             console.error("Error al cargar datos:", error);

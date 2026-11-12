@@ -50,6 +50,27 @@ async function seed() {
       activo = true;
   `, [permisosHash]);
 
+  // Asegurar registro de profesor para profe@unach.mx y test.profe@unach.mx
+  await dbConnection.none(`
+    INSERT INTO profesores (profesor_id, nombres, apellidos, matricula, grado_academico, numero_plaza, numero_contrato, direccion, telefono, email, tipo_contrato_id)
+    SELECT u.usuario_id, 'Profesor', 'UNACH', 'PROF-0003', 'Maestría', 'PLAZA-0003', 'CONTRATO-0003', 'Tuxtla Gutiérrez, Chiapas', '9610000003', u.email, 1
+    FROM usuarios u
+    WHERE u.email = 'profe@unach.mx'
+    ON CONFLICT (profesor_id) DO UPDATE SET
+      nombres = EXCLUDED.nombres,
+      apellidos = EXCLUDED.apellidos,
+      email = EXCLUDED.email;
+
+    INSERT INTO profesores (profesor_id, nombres, apellidos, matricula, grado_academico, numero_plaza, numero_contrato, direccion, telefono, email, tipo_contrato_id)
+    SELECT u.usuario_id, 'Test', 'Profesor', 'TEST001', 'Maestría', 'PLAZA001', 'CONTRATO001', 'Dirección Test', '555-1234', u.email, 1
+    FROM usuarios u
+    WHERE u.email = 'test.profe@unach.mx'
+    ON CONFLICT (profesor_id) DO UPDATE SET
+      nombres = EXCLUDED.nombres,
+      apellidos = EXCLUDED.apellidos,
+      email = EXCLUDED.email;
+  `);
+
   console.log('Usuarios de prueba listos');
   process.exit(0);
 }

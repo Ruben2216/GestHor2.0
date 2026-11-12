@@ -42,10 +42,23 @@ const obtenerPorId = async (id) => {
 
 const obtenerNombreProfesor = async (id) => {
     try {
-        const profesor = await dbConnection.oneOrNone(
+        let profesor = await dbConnection.oneOrNone(
             'SELECT nombres, apellidos FROM profesores WHERE profesor_id = $1',
             [id]
         );
+        if (!profesor) {
+            const usuario = await dbConnection.oneOrNone(
+                'SELECT nombre, email FROM usuarios WHERE usuario_id = $1',
+                [id]
+            );
+            if (usuario) {
+                const nombreParts = (usuario.nombre || usuario.email.split('@')[0]).trim().split(' ');
+                profesor = {
+                    nombres: nombreParts[0] || 'Profesor',
+                    apellidos: nombreParts.slice(1).join(' ') || ''
+                };
+            }
+        }
         return profesor;
     } catch (error) {
         console.error('Error al obtener nombre del profesor:', error);
