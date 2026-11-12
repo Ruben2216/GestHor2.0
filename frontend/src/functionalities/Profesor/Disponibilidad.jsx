@@ -84,15 +84,21 @@ export default function Disponibilidad() {
 
     const cargarDatos = async () => {
         try {
-            const [dataNombre, dataDisponibilidad, dataPreferencias] = await Promise.all([
+            const [nombreResult, dispResult, prefResult] = await Promise.allSettled([
                 obtenerNombreProfesor(profesorId),
                 obtenerDisponibilidad(profesorId),
                 obtenerPreferencias(profesorId)
             ]);
 
-            if (dataNombre.profesor) {
-                setNombreProfesor(`${dataNombre.profesor.nombres} ${dataNombre.profesor.apellidos}`);
+            if (nombreResult.status === 'fulfilled' && nombreResult.value?.profesor) {
+                const { nombres, apellidos } = nombreResult.value.profesor;
+                setNombreProfesor(`${nombres} ${apellidos}`.trim());
+            } else if (user.nombre) {
+                setNombreProfesor(user.nombre);
             }
+
+            const dataDisponibilidad = dispResult.status === 'fulfilled' ? dispResult.value : {};
+            const dataPreferencias = prefResult.status === 'fulfilled' ? prefResult.value : {};
 
             if (dataDisponibilidad.disponibilidad && dataDisponibilidad.disponibilidad.length > 0) {
                 const disponibilidadCargada = { matutino: {}, vespertino: {} };
