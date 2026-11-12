@@ -1,4 +1,6 @@
 import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import helmet from "helmet";
 import session from "express-session";
@@ -224,25 +226,30 @@ app.use((err, req, res, _next) => {
   });
 });
 
-app.listen(env.port, () => {
-  console.log(`🚀 Servidor escuchando en ${env.backend.url}`);
-  console.log(`🌐 Frontend configurado en: ${env.frontend.url}`);
-  console.log(`🔧 Entorno: ${env.nodeEnv}`);
-});
+export default app;
 
-// Keep process alive
-process.stdin.resume();
+const isMainModule = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Cerrando servidor...');
-  process.exit(0);
-});
+if (isMainModule) {
+  app.listen(env.port, () => {
+    console.log(`🚀 Servidor escuchando en ${env.backend.url}`);
+    console.log(`🌐 Frontend configurado en: ${env.frontend.url}`);
+    console.log(`🔧 Entorno: ${env.nodeEnv}`);
+  });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
+  process.stdin.resume();
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
+  process.on('SIGINT', () => {
+    console.log('Cerrando servidor...');
+    process.exit(0);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  });
+
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+  });
+}

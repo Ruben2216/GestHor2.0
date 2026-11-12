@@ -1,4 +1,14 @@
 import { dbConnection } from "../config/database.js";
+import { decryptField, encryptField } from "../services/fieldEncryptionService.js";
+
+function descifrarPreferencias(preferencias) {
+    if (!preferencias) return preferencias;
+
+    return {
+        ...preferencias,
+        comentarios_adicionales: decryptField(preferencias.comentarios_adicionales),
+    };
+}
 
 const obtenerDisponibilidadProfesor = async (profesorId) => {
     const query = `
@@ -59,7 +69,8 @@ const obtenerPreferenciasProfesor = async (profesorId) => {
         FROM profesor_preferencias
         WHERE profesor_id = $1
     `;
-    return await dbConnection.oneOrNone(query, [profesorId]);
+    const preferencias = await dbConnection.oneOrNone(query, [profesorId]);
+    return descifrarPreferencias(preferencias);
 };
 
 const guardarPreferenciasProfesor = async (profesorId, maxHorasDia, preferenciaHorario, comentarios) => {
@@ -68,6 +79,7 @@ const guardarPreferenciasProfesor = async (profesorId, maxHorasDia, preferenciaH
     `;
     
     const existe = await dbConnection.oneOrNone(queryVerificar, [profesorId]);
+    const comentariosCifrados = encryptField(comentarios);
     
     if (existe) {
         const queryUpdate = `
@@ -79,7 +91,8 @@ const guardarPreferenciasProfesor = async (profesorId, maxHorasDia, preferenciaH
             WHERE profesor_id = $1
             RETURNING *
         `;
-        return await dbConnection.one(queryUpdate, [profesorId, maxHorasDia, preferenciaHorario, comentarios]);
+        const preferencias = await dbConnection.one(queryUpdate, [profesorId, maxHorasDia, preferenciaHorario, comentariosCifrados]);
+        return descifrarPreferencias(preferencias);
     } else {
         const queryInsert = `
             INSERT INTO profesor_preferencias 
@@ -87,7 +100,8 @@ const guardarPreferenciasProfesor = async (profesorId, maxHorasDia, preferenciaH
             VALUES ($1, $2, $3, $4)
             RETURNING *
         `;
-        return await dbConnection.one(queryInsert, [profesorId, maxHorasDia, preferenciaHorario, comentarios]);
+        const preferencias = await dbConnection.one(queryInsert, [profesorId, maxHorasDia, preferenciaHorario, comentariosCifrados]);
+        return descifrarPreferencias(preferencias);
     }
 };
 
