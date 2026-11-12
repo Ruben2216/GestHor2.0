@@ -1,0 +1,64 @@
+REPORTE - FIRMA Y VERIFICACION DE JWT (RS256 / HS256)
+INTEGRANTE 4: Firma y verificación de JWT
+
+1. Analisis de viabilidad y alcance
+Se implemento la transicion de los access tokens al algoritmo asimetrico RS256,
+conservando el ciclo y la firma simetrica HS256 para los refresh tokens.
+Siguiendo estrictamente la delimitacion del Integrante 4:
+- Solo se modificaron backend/src/config/jwt.js y backend/src/services/tokenService.js.
+- Se creo la suite de pruebas unitarias focalizada backend/tests/tokenService.test.js.
+- No se modificaron env.js, authController.js ni archivos asignados a otros integrantes.
+
+2. Trabajo realizado
+- backend/src/config/jwt.js:
+  * Configuracion para resolucion de claves asimetricas RSA.
+  * Diseñado para consumir el modulo del Integrante 3 (backend/src/config/asymmetricKeys.js)
+    cuando este disponible (via import dinamico sin romper la ejecucion previa).
+  * Fallback seguro a variables de entorno (JWT_ACCESS_PRIVATE_KEY_B64 y
+    JWT_ACCESS_PUBLIC_KEY_B64 decodificadas de Base64) o generacion temporal en memoria
+    (RSA 2048 bits) para desarrollo y pruebas aisladas.
+  * Define explicitamente accessAlgorithm: 'RS256' y refreshAlgorithm: 'HS256'.
+
+- backend/src/services/tokenService.js:
+  * issueAccessToken: firma usando la clave privada RSA con algorithm: 'RS256'.
+  * verifyAccessToken: verifica con la clave publica RSA y restringe estrictamente
+    algorithms: ['RS256']. Valida adicionalmente que el token sea de tipo 'access'.
+  * Conserva todo el contenido funcional del token: sub, email, rol, type, jti,
+    expiracion (exp), emisor (iss) y audiencia (aud).
+  * issueRefreshToken: firma con JWT_REFRESH_SECRET fijando explicitamente algorithm: 'HS256'.
+  * verifyRefreshToken: verifica con JWT_REFRESH_SECRET restringiendo explicitamente
+    algorithms: ['HS256']. Valida adicionalmente que el token sea de tipo 'refresh'.
+  * Manejo y conservacion de excepciones: TokenExpiredError para tokens expirados e
+    InvalidTokenError para tokens con firma corrupta, alterados, tipo incorrecto o
+    claves invalidas.
+  * Proteccion estricta contra ataques de confusion de algoritmos (rechazo de tokens
+    firmados con HS256 en verifyAccessToken) y confusion de tipos (rechazo cruzado
+    entre access tokens y refresh tokens).
+  * Conserva todas las funciones publicas originales: hashTokenForStorage,
+    decodeTokenWithoutVerify, extractJtiFromToken, isAccessToken, isRefreshToken.
+
+3. Pruebas obligatorias implementadas (backend/tests/tokenService.test.js)
+  * Access token emitido con encabezado alg: RS256 y typ: JWT.
+  * Firma valida al verificar con la clave publica correspondiente (directa y via verifyAccessToken).
+  * Rechazo de access token alterado (payload o firma).
+  * Rechazo de access token expirado (TokenExpiredError).
+  * Rechazo de access token firmado con otra clave RSA no autorizada.
+  * Rechazo de access token declarado con HS256 (ataque de confusion de algoritmo).
+  * Claims y expiracion conservados (sub, email, rol, type, jti, iat, exp, iss, aud).
+  * Refresh token HS256 emitido y verificado correctamente.
+  * Rechazo de refresh token alterado o expirado.
+  * Aislamiento de tipos: refresh token rechazado en verifyAccessToken; access token
+    rechazado en verifyRefreshToken.
+  * Funciones auxiliares probadas y operativas.
+
+4. Como probar
+1. Abrir terminal en la carpeta backend.
+2. Ejecutar la suite unitaria de tokens:
+   node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --forceExit tests/tokenService.test.js
+3. Resultado esperado: 1 suite y 24 pruebas aprobadas (100% exito).
+
+5. Estado de validacion
+- 24/24 pruebas unitarias aprobadas en tests/tokenService.test.js.
+- tokenService ofrece exactamente la misma interfaz publica que antes pero utilizando RS256.
+- Cumple al 100% con los criterios de aceptacion del Integrante 4.
+
