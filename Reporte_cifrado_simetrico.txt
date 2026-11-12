@@ -1,0 +1,48 @@
+REPORTE - SERVICIO DE CIFRADO SIMETRICO
+
+Analisis de viabilidad
+Es posible avanzar sin los cambios del integrante 1 porque las metas ya
+establecen una interfaz común: APP_ENCRYPTION_KEY_B64, AES-256-GCM,
+encryptField(texto) y decryptField(valor). El servicio es independiente de la
+base de datos y de los controladores, por lo que su desarrollo y pruebas
+unitarias no requieren esos avances ni afectan el trabajo de los integrantes
+3, 4 y 5.
+
+Trabajo realizado
+- Se creo backend/src/services/fieldEncryptionService.js.
+- La clave se lee desde APP_ENCRYPTION_KEY_B64, se valida como Base64 canonico
+  y se exige que corresponda exactamente a 32 bytes. Los errores no exponen
+  su contenido.
+- encryptField usa AES-256-GCM, un nonce aleatorio de 12 bytes por operacion y
+  un tag de autenticacion de 16 bytes.
+- El valor persistible tiene formato v1:<nonce-hex>:<tag-hex>:<ciphertext-hex>.
+- decryptField valida la version y los componentes; errores de integridad,
+  clave incorrecta o datos alterados causan fallo, no una respuesta vacia.
+- Comportamiento acordado para NULL y cadena vacia: null se conserva como
+  null; '' se cifra y recupera como una cadena vacia no nula.
+- Se creo backend/tests/fieldEncryption.test.js con pruebas de ida y vuelta,
+  nonce aleatorio, manipulacion, formatos invalidos, claves invalidas,
+  clave incorrecta, recarga del modulo, NULL y cadena vacia.
+- No se modificaron modelos, controladores, consultas SQL, configuracion
+  general ni archivos de otros integrantes. La integracion del cifrado con
+  guardar/obtener preferencias y la comprobacion en PostgreSQL no forman parte
+  de esta entrega.
+
+Como probar
+1. Abrir PowerShell en la carpeta backend.
+2. Ejecutar:
+   $env:APP_ENCRYPTION_KEY_B64 = [Convert]::ToBase64String([byte[]](1..32))
+   npm test -- --runInBand tests/fieldEncryption.test.js
+3. La suite debe terminar sin fallos. La clave anterior es solo para pruebas
+   locales; no debe guardarse en el repositorio ni reutilizarse en produccion.
+4. En la aplicacion, configurar una clave privada de 32 bytes codificada en
+   Base64 mediante APP_ENCRYPTION_KEY_B64, fuera del repositorio. Importar las
+   funciones desde backend/src/services/fieldEncryptionService.js.
+5. Se puede generar una clave aleatoria de prueba con:
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+
+Estado de validacion
+Se ejecuto la suite focalizada con Jest: 1 suite y 11 pruebas aprobadas. La
+prueba no requiere conexion a PostgreSQL. El recorrido de API/BD debe probarse
+despues de que el integrante responsable integre estas funciones en la
+persistencia de preferencias y este disponible la BD compartida.
