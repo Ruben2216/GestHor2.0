@@ -1,48 +1,69 @@
-REPORTE - SERVICIO DE CIFRADO SIMETRICO
+REPORTE - INTEGRACION DE COMENTARIOS CIFRADOS Y BD DE PRACTICA
 
-Analisis de viabilidad
-Es posible avanzar sin los cambios del integrante 1 porque las metas ya
-establecen una interfaz común: APP_ENCRYPTION_KEY_B64, AES-256-GCM,
-encryptField(texto) y decryptField(valor). El servicio es independiente de la
-base de datos y de los controladores, por lo que su desarrollo y pruebas
-unitarias no requieren esos avances ni afectan el trabajo de los integrantes
-3, 4 y 5.
+Base de datos compartida
+- Se creo GestHor_Practica_Compartida a partir de GestHor usando pg_dump
+  --schema-only y restaurando unicamente el SQL de esquema. No se restauro
+  ejecutarFinal.sql.
+- Antes de insertar las cuentas ficticias se verifico que las 24 tablas
+  estuvieran vacias; el dump no tenia instrucciones COPY.
+- Se verificaron 154 restricciones, 61 indices y 21 secuencias.
+- Se insertaron dos roles (administrador y profesor), dos permisos minimos,
+  dos cuentas ficticias y el registro de profesor relacionado.
+- Despues de las pruebas, las tablas contienen solo esos datos iniciales:
+  usuarios=2, profesores=1, roles=2, permisos=2, rol_permisos=2 y
+  profesor_preferencias=0. Las demas tablas no contienen filas.
+- El archivo backend/.env local se actualizo para apuntar a
+  GestHor_Practica_Compartida y contiene la clave AES y la contrasena de
+  pruebas. backend/.env esta ignorado por Git; no se incluyo ningun secreto
+  en los archivos del repositorio.
+- La configuracion y la clave deben compartirse con el equipo exclusivamente
+  por un canal privado (por ejemplo, un gestor de secretos). No enviar claves
+  por Git, correo abierto ni este reporte.
 
-Trabajo realizado
-- Se creo backend/src/services/fieldEncryptionService.js.
-- La clave se lee desde APP_ENCRYPTION_KEY_B64, se valida como Base64 canonico
-  y se exige que corresponda exactamente a 32 bytes. Los errores no exponen
-  su contenido.
-- encryptField usa AES-256-GCM, un nonce aleatorio de 12 bytes por operacion y
-  un tag de autenticacion de 16 bytes.
-- El valor persistible tiene formato v1:<nonce-hex>:<tag-hex>:<ciphertext-hex>.
-- decryptField valida la version y los componentes; errores de integridad,
-  clave incorrecta o datos alterados causan fallo, no una respuesta vacia.
-- Comportamiento acordado para NULL y cadena vacia: null se conserva como
-  null; '' se cifra y recupera como una cadena vacia no nula.
-- Se creo backend/tests/fieldEncryption.test.js con pruebas de ida y vuelta,
-  nonce aleatorio, manipulacion, formatos invalidos, claves invalidas,
-  clave incorrecta, recarga del modulo, NULL y cadena vacia.
-- No se modificaron modelos, controladores, consultas SQL, configuracion
-  general ni archivos de otros integrantes. La integracion del cifrado con
-  guardar/obtener preferencias y la comprobacion en PostgreSQL no forman parte
-  de esta entrega.
+Integracion de comentarios
+- backend/src/models/disponibilidadModel.js cifra comentarios_adicionales
+  antes del INSERT/UPDATE y descifra el RETURNING antes de responder.
+- Las lecturas de preferencias tambien descifran el campo. Si el valor esta
+  alterado o malformado, la lectura falla con error HTTP en vez de devolver
+  texto vacio.
+- null se conserva como null; la cadena vacia se cifra y se devuelve como ''.
+- backend/app.js exporta la aplicacion sin iniciar el servidor al importarla,
+  para permitir pruebas HTTP reales con Supertest. Ejecutar node app.js
+  mantiene el arranque normal.
 
-Como probar
-1. Abrir PowerShell en la carpeta backend.
-2. Ejecutar:
-   $env:APP_ENCRYPTION_KEY_B64 = [Convert]::ToBase64String([byte[]](1..32))
-   npm test -- --runInBand tests/fieldEncryption.test.js
-3. La suite debe terminar sin fallos. La clave anterior es solo para pruebas
-   locales; no debe guardarse en el repositorio ni reutilizarse en produccion.
-4. En la aplicacion, configurar una clave privada de 32 bytes codificada en
-   Base64 mediante APP_ENCRYPTION_KEY_B64, fuera del repositorio. Importar las
-   funciones desde backend/src/services/fieldEncryptionService.js.
-5. Se puede generar una clave aleatoria de prueba con:
-   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+Preparacion reproducible
+Desde backend, con PostgreSQL local accesible y DB_USER/DB_PASSWORD
+configurados en backend/.env:
+  node scripts/prepare_shared_practice_db.js
+
+El script usa GestHor como fuente por defecto y
+GestHor_Practica_Compartida como destino. Antes de crear la base valida que
+el destino no exista; no elimina ni reemplaza una base existente. Para elegir
+otro nombre, configurar DB_SOURCE_NAME y SHARED_DB_NAME en el entorno.
+PRACTICE_TEST_PASSWORD debe configurarse localmente con al menos 16
+caracteres. El dump temporal se elimina al completar el proceso.
+
+Pruebas
+Desde backend, con APP_ENCRYPTION_KEY_B64 y PRACTICE_TEST_PASSWORD
+configurados en backend/.env:
+  npm test -- --runInBand tests/fieldEncryption.test.js tests/preferences.encryption.integration.test.js
+
+Las pruebas de integracion crean cuentas con sufijos aleatorios y eliminan
+solamente sus propias filas. Verifican:
+- POST devuelve texto legible mientras PostgreSQL almacena formato
+  v1:<nonce>:<tag>:<ciphertext>.
+- GET devuelve el comentario original.
+- La actualizacion escribe ciphertext nuevo y mantiene legible la respuesta.
+- La cadena vacia se cifra y recupera correctamente.
+- El profesor conserva acceso a sus preferencias, no puede leer las de otro
+  identificador, y el administrador puede consultar el perfil del profesor.
+- La vista consolidada del profesor devuelve preferencias legibles.
+- Un ciphertext malformado produce error de lectura.
 
 Estado de validacion
-Se ejecuto la suite focalizada con Jest: 1 suite y 11 pruebas aprobadas. La
-prueba no requiere conexion a PostgreSQL. El recorrido de API/BD debe probarse
-despues de que el integrante responsable integre estas funciones en la
-persistencia de preferencias y este disponible la BD compartida.
+- Jest: 2 suites y 17 pruebas aprobadas (11 unitarias y 6 de integracion con
+  PostgreSQL).
+- El estado final de la BD fue verificado: no quedaron cuentas ni preferencias
+  creadas por las pruebas.
+- El canal privado de distribucion al equipo debe completarlo la persona
+  responsable del equipo; este entorno no envia mensajes privados a terceros.
