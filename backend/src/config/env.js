@@ -37,7 +37,6 @@ export const env = {
   },
   
   jwt: {
-    secret: getSecureKey('JWT_SECRET', true),
     refreshSecret: getSecureKey('JWT_REFRESH_SECRET', true),
     expiresIn: process.env.JWT_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
@@ -167,7 +166,7 @@ export function validateSecurityConfig() {
   ];
 
   if (currentIsProd) {
-    const requiredVars = ['DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_SECRET', 'JWT_REFRESH_SECRET', 'SESSION_SECRET'];
+    const requiredVars = ['DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_REFRESH_SECRET', 'SESSION_SECRET'];
     for (const key of requiredVars) {
       const val = process.env[key];
       if (!val) {
@@ -181,6 +180,12 @@ export function validateSecurityConfig() {
     if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.startsWith('https://')) {
       throw new Error('[SEGURIDAD] En producción, FRONTEND_URL debe utilizar el protocolo seguro HTTPS.');
     }
+  }
+  const encryptionKey = process.env.APP_ENCRYPTION_KEY_B64;
+  if (!encryptionKey || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encryptionKey)
+    || Buffer.from(encryptionKey, 'base64').length !== 32
+    || Buffer.from(encryptionKey, 'base64').toString('base64') !== encryptionKey) {
+    throw new Error('APP_ENCRYPTION_KEY_B64 debe contener exactamente 32 bytes en Base64.');
   }
 }
 

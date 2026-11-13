@@ -188,7 +188,11 @@ ON CONFLICT (carrera_id, materia_id, numero_semestre) DO NOTHING;
 # Para cada cambio colocar npm install, puede que se hayan agregado nuevas dependencias (en el caso de que falle) - EN ESTE CASO EN BACKEND
 **Agregar lo siguiente en el .env para que jale (del backend)**
 JWT_EXPIRES_IN=15m
-JWT_SECRET= *coloca el siguiente comando y te generara el codigo / openssl rand -base64 32 / copialo y pagalo ahi*
+Los access tokens usan `JWT_ACCESS_PRIVATE_KEY_B64` y `JWT_ACCESS_PUBLIC_KEY_B64` (par RSA PEM en Base64); el refresh token usa `JWT_REFRESH_SECRET`. `JWT_SECRET` ya no se utiliza.
+
+## Prueba de autenticación real en GestHor
+
+Desde `backend`, configura `AUTH_TEST_USER_PASSWORD` y `AUTH_TEST_ADMIN_PASSWORD` solo en la sesión de terminal y ejecuta `npm run test:auth-real`. El script comprueba que la cuenta de prueba inicia como profesor, prueba login, errores, Google simulado, refresh y los cambios profesor → editor → estudiante → profesor. Restaura profesor y revoca las sesiones de prueba al terminar. Si el proceso se interrumpe, ejecuta `AUTH_TEST_RECOVER=1 node scripts/recover_auth_real.js` (en PowerShell, define la variable de entorno antes del comando). No pongas las contraseñas de prueba en el repositorio.
 
 
 

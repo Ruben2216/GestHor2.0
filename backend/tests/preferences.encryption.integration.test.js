@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 
 dotenv.config();
 
-const sharedDatabase = process.env.SHARED_DB_NAME || 'GestHor_Practica_Compartida';
+const testDatabase = 'GestHor';
 const testPassword = process.env.PRACTICE_TEST_PASSWORD;
 const testSuffix = randomUUID().replaceAll('-', '');
 const emails = [
@@ -14,7 +14,6 @@ const emails = [
   `practice-professor-${testSuffix}@example.test`,
 ];
 
-process.env.DB_NAME = sharedDatabase;
 process.env.APP_ENCRYPTION_KEY_B64 ??= randomBytes(32).toString('base64');
 
 let dbConnection;
@@ -34,16 +33,16 @@ async function createApiSessions() {
   const passwordHash = await bcrypt.hash(testPassword, 10);
 
   const admin = await dbConnection.one(`
-    INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, email_verificado)
-    VALUES ($1, $2, $2, 'Administrador de prueba', $3, TRUE, TRUE)
+    INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, email_verificado)
+    VALUES ($1, $2, 'Administrador de prueba', $3, TRUE, TRUE)
     RETURNING usuario_id
   `, [emails[0], passwordHash, adminRole.rol_id]);
   adminId = admin.usuario_id;
   userIds.push(adminId);
 
   const professor = await dbConnection.one(`
-    INSERT INTO usuarios (email, password, password_hash, nombre, rol_id, activo, email_verificado)
-    VALUES ($1, $2, $2, 'Profesor de prueba', $3, TRUE, TRUE)
+    INSERT INTO usuarios (email, password_hash, nombre, rol_id, activo, email_verificado)
+    VALUES ($1, $2, 'Profesor de prueba', $3, TRUE, TRUE)
     RETURNING usuario_id
   `, [emails[1], passwordHash, professorRole.rol_id]);
   professorId = professor.usuario_id;
@@ -73,8 +72,8 @@ describe('cifrado de comentarios de preferencias con PostgreSQL', () => {
 
     ({ dbConnection } = await import('../src/config/database.js'));
     const database = await dbConnection.one('SELECT current_database() AS name');
-    if (database.name !== sharedDatabase) {
-      throw new Error(`Las pruebas requieren la BD ${sharedDatabase}; la conexión seleccionó otra base.`);
+    if (database.name !== testDatabase) {
+      throw new Error(`Las pruebas requieren la BD ${testDatabase}; la conexión seleccionó otra base.`);
     }
 
     ({ default: app } = await import('../app.js'));

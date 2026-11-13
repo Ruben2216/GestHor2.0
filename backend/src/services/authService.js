@@ -213,12 +213,21 @@ async function compareRefreshToken(token, storedHash) {
   return hashToken(token) === storedHash;
 }
 
-export async function logout(userId, refreshToken, ipOrigen, userAgent) {
+export async function logout(userId, refreshToken, ipOrigen, userAgent, accessJti) {
+  if (accessJti) {
+    const activeSession = await sessionService.findSessionByAccessJti(accessJti);
+    if (activeSession && Number(activeSession.usuario_id) === Number(userId)) {
+      await refreshTokenRepository.revokeByJti(activeSession.refresh_jti);
+    }
+    await sessionService.revokeSession(userId, accessJti);
+  }
   if (refreshToken) {
     try {
       const decoded = tokenService.verifyRefreshToken(refreshToken);
-      await refreshTokenRepository.revokeByJti(decoded.jti);
-      await sessionService.revokeSession(userId, decoded.jti);
+      if (String(decoded.sub) === String(userId)) {
+        await refreshTokenRepository.revokeByJti(decoded.jti);
+        await sessionService.revokeSession(userId, decoded.jti);
+      }
     } catch (error) {
       console.warn('Error revocando refresh token en logout:', error.message);
     }

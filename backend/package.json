@@ -7,6 +7,10 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test:permisos": "node scripts/probar-permisos.js",
+    "test:auth-real": "node scripts/test_auth_real.js",
+    "test:auth-config": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/authConfiguration.test.js --runInBand",
+    "test:auth-unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/auth.security.test.js tests/fieldEncryption.test.js tests/asymmetricKeys.test.js tests/tokenService.test.js tests/authConfiguration.test.js --runInBand",
+    "test:auth": "npm run test:auth-unit && npm run test:auth-real",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --forceExit"
   },
   "keywords": [],
