@@ -43,6 +43,40 @@ sudo systemctl stop postgresql    # Detiene PostgreSQL (base de datos)
 # BASE DE DATOS
 ejecutar el .sql dentro de 'Query tool' de pgAdmin4 web con el nombre de GesThor la BDTS 
 
+# Copia local de la BD de práctica
+Cada integrante puede crear su propia copia limpia de la BD de práctica en su
+instalación local de PostgreSQL 18. El repositorio incluye únicamente el
+esquema sin registros en `backend/src/database/practice_schema.sql`; el script
+agrega los roles, permisos y usuarios ficticios mínimos. No se necesita la BD
+fuente `GestHor` ni se debe importar `ejecutarFinal.sql`.
+
+1. Instalar PostgreSQL y las dependencias del backend (`cd backend` y
+   `npm install`).
+2. Crear `backend/.env` a partir de `backend/.env.example`. Configurar las
+   credenciales locales de PostgreSQL y establecer:
+
+   ```env
+   DB_NAME=GestHor_Practica_Compartida
+   SHARED_DB_NAME=GestHor_Practica_Compartida
+   PRACTICE_TEST_PASSWORD=una_contrasena_local_de_al_menos_16_caracteres
+   ```
+
+   El usuario configurado en `DB_USER` debe poder crear bases de datos.
+   `PRACTICE_TEST_PASSWORD` se usa para los dos usuarios ficticios locales;
+   no usar una contraseña real.
+3. Desde `backend`, ejecutar:
+
+   ```powershell
+   node scripts/prepare_shared_practice_db.js
+   ```
+
+El ejecutable `psql` de PostgreSQL 18 debe estar disponible en `PATH`; si no,
+configurar `PSQL_BIN` con su ruta completa en el entorno local.
+El script se niega a reemplazar una base que ya exista. Después de crearla,
+`DB_NAME` debe seguir apuntando a `GestHor_Practica_Compartida` para que la
+aplicación use esa copia. Cada dispositivo tendrá una base independiente:
+los cambios de datos no se sincronizan entre compañeros.
+
 # env
 debe estar en la carpeta backend (ver backend/.env.example)
 

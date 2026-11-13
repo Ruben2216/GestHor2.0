@@ -1,0 +1,67 @@
+REPORTE DE ACTIVIDADES - INTEGRANTE 2
+GestHor2.0
+
+Resultado
+Las actividades asignadas al Integrante 2 ya estaban implementadas. Se
+verificaron el código, la base compartida y las pruebas; no fue necesario
+modificar la integración existente.
+
+Base de datos compartida
+- La configuración local apunta a GestHor_Practica_Compartida, distinta de
+  la base fuente GestHor. Las credenciales y claves permanecen en
+  backend/.env, ignorado por Git; no se incluyen en este reporte.
+- backend/scripts/prepare_shared_practice_db.js crea la base solo si no
+  existe, restaura backend/src/database/practice_schema.sql y después inserta
+  los datos ficticios mínimos. El dump de esquema se generó sin filas ni
+  instrucciones COPY/INSERT.
+- Antes de crear las cuentas ficticias, el script verifica que todas las
+  tablas restauradas estén vacías y confirma que existen tablas,
+  restricciones, índices y secuencias.
+- La verificación directa de la BD compartida encontró 24 tablas, 154
+  restricciones, 61 índices y 21 secuencias.
+- Conteos actuales: 2 roles, 2 permisos, 2 relaciones rol-permiso, 2
+  usuarios ficticios, 1 profesor y 0 preferencias. No se restauró
+  ejecutarFinal.sql.
+
+Integración de comentarios
+- backend/src/models/disponibilidadModel.js usa encryptField antes de
+  INSERT/UPDATE y descifra el resultado de RETURNING y las lecturas SELECT.
+- backend/src/controllers/disponibilidadController.js conserva las rutas y
+  la respuesta con comentarios legibles. Los errores de descifrado se
+  responden como errores de lectura; no se reemplazan por texto vacío.
+- El servicio documenta que null se conserva como null y que '' se cifra y
+  recupera como una cadena vacía.
+- backend/tests/preferences.encryption.integration.test.js verifica POST,
+  GET, almacenamiento cifrado, actualización, comentario vacío, permisos,
+  lectura de preferencias en vistas de profesor y administrador, y error
+  ante ciphertext malformado. Las pruebas generan datos únicos y limpian
+  únicamente los registros creados por ellas.
+
+Validación ejecutada
+Desde backend:
+  npm test -- --runInBand tests/fieldEncryption.test.js tests/preferences.encryption.integration.test.js
+
+Resultado: 2 suites y 17 pruebas aprobadas. La suite de integración conectó
+a PostgreSQL y el estado actual de profesor_preferencias quedó en cero filas.
+
+Preparación reproducible
+El repositorio incluye backend/src/database/practice_schema.sql, un dump
+schema-only obtenido de la BD de práctica, sin filas ni instrucciones COPY.
+Cada integrante puede crear su propia copia local (estructura más los datos
+ficticios mínimos) sin tener la BD original GestHor:
+
+1. Instalar PostgreSQL 18 y las dependencias del backend.
+2. Configurar backend/.env con DB_USER, DB_PASSWORD, DB_HOST y DB_PORT.
+   DB_USER debe poder crear bases de datos.
+3. Establecer DB_NAME y SHARED_DB_NAME a
+   GestHor_Practica_Compartida, y configurar PRACTICE_TEST_PASSWORD local
+   con al menos 16 caracteres.
+4. Desde backend, ejecutar:
+  node scripts/prepare_shared_practice_db.js
+
+El script no reemplaza una base existente. Cada copia es independiente y los
+cambios de datos no se sincronizan. No se comparte una copia binaria .db:
+PostgreSQL administra los archivos de cada servidor; el esquema versionado y
+el script reproducen la estructura y los datos ficticios iniciales.
+Se requiere psql 18 en PATH (o configurar PSQL_BIN localmente).
+No compartir credenciales ni claves por Git ni incluirlas en reportes.

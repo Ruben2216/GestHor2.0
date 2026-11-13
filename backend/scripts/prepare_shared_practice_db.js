@@ -1,9 +1,7 @@
 import { spawn } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import { readFile, unlink } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import os from 'node:os';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import pg from 'pg';
@@ -14,9 +12,9 @@ const pgp = pgPromise();
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(scriptDirectory, '../.env') });
 
-const sourceDatabase = process.env.DB_SOURCE_NAME || 'GestHor';
 const sharedDatabase = process.env.SHARED_DB_NAME || 'GestHor_Practica_Compartida';
 const testPassword = process.env.PRACTICE_TEST_PASSWORD;
+const schemaPath = path.resolve(scriptDirectory, '../src/database/practice_schema.sql');
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT || 5432),
@@ -209,12 +207,7 @@ async function main() {
   if (!/^[A-Za-z][A-Za-z0-9_]{0,62}$/.test(sharedDatabase)) {
     throw new Error('SHARED_DB_NAME debe ser un identificador PostgreSQL válido de hasta 63 caracteres.');
   }
-  if (sourceDatabase === sharedDatabase) {
-    throw new Error('La base compartida debe tener un nombre distinto al de la base fuente.');
-  }
-
   const maintenanceClient = await connectTo('postgres');
-  let dumpPath;
   try {
     const roleResult = await maintenanceClient.query(`
       SELECT rolcreatedb, rolsuper
@@ -227,33 +220,16 @@ async function main() {
 
     const databases = await maintenanceClient.query(
       'SELECT datname FROM pg_database WHERE datname = ANY($1)',
-      [[sourceDatabase, sharedDatabase]],
+      [[sharedDatabase]],
     );
     const existingNames = new Set(databases.rows.map(row => row.datname));
-    if (!existingNames.has(sourceDatabase)) {
-      throw new Error(`No existe la base fuente configurada: ${sourceDatabase}.`);
-    }
     if (existingNames.has(sharedDatabase)) {
       throw new Error(`La base destino ${sharedDatabase} ya existe; no se modificó ni eliminó.`);
     }
 
-    dumpPath = path.join(os.tmpdir(), `gesthor-schema-${randomUUID()}.sql`);
-    await runCommand(process.env.PG_DUMP_BIN || 'pg_dump', [
-      '--schema-only',
-      '--no-owner',
-      '--no-acl',
-      '--format=plain',
-      '--no-password',
-      '--host', dbConfig.host,
-      '--port', String(dbConfig.port),
-      '--username', dbConfig.user,
-      '--dbname', sourceDatabase,
-      '--file', dumpPath,
-    ]);
-
-    const schemaDump = await readFile(dumpPath, 'utf8');
-    if (/^COPY\s+(?:public\.)?/mi.test(schemaDump)) {
-      throw new Error('El dump contiene instrucciones COPY; se canceló para evitar copiar registros.');
+    const schemaDump = await readFile(schemaPath, 'utf8');
+    if (/^(?:COPY|INSERT\s+INTO)\s+(?:public\.)?/mi.test(schemaDump)) {
+      throw new Error('El archivo de esquema contiene instrucciones de carga de datos; se canceló la preparación.');
     }
 
     await maintenanceClient.query(
@@ -263,43 +239,34 @@ async function main() {
     await maintenanceClient.end();
   }
 
-  try {
-    await runCommand(process.env.PSQL_BIN || 'psql', [
-      '--no-password',
-      '--set', 'ON_ERROR_STOP=1',
-      '--host', dbConfig.host,
-      '--port', String(dbConfig.port),
-      '--username', dbConfig.user,
-      '--dbname', sharedDatabase,
-      '--file', dumpPath,
-    ]);
+  await runCommand(process.env.PSQL_BIN || 'psql', [
+    '--no-password',
+    '--set', 'ON_ERROR_STOP=1',
+    '--host', dbConfig.host,
+    '--port', String(dbConfig.port),
+    '--username', dbConfig.user,
+    '--dbname', sharedDatabase,
+    '--file', schemaPath,
+  ]);
 
-    const targetClient = await connectTo(sharedDatabase);
-    try {
-      const schemaStats = await verifyEmptySchema(targetClient);
-      const fixtureIds = await insertPracticeFixtures(targetClient);
-      console.log(JSON.stringify({
-        sourceDatabase,
-        sharedDatabase,
-        schemaStats,
-        allTablesWereEmptyBeforeFixtures: true,
-        fixtureCounts: {
-          roles: 2,
-          permissions: 2,
-          users: 2,
-          professors: 1,
-        },
-        fixtureIds,
-      }, null, 2));
-    } finally {
-      await targetClient.end();
-    }
+  const targetClient = await connectTo(sharedDatabase);
+  try {
+    const schemaStats = await verifyEmptySchema(targetClient);
+    const fixtureIds = await insertPracticeFixtures(targetClient);
+    console.log(JSON.stringify({
+      sharedDatabase,
+      schemaStats,
+      allTablesWereEmptyBeforeFixtures: true,
+      fixtureCounts: {
+        roles: 2,
+        permissions: 2,
+        users: 2,
+        professors: 1,
+      },
+      fixtureIds,
+    }, null, 2));
   } finally {
-    if (dumpPath) {
-      await unlink(dumpPath).catch(error => {
-        if (error.code !== 'ENOENT') throw error;
-      });
-    }
+    await targetClient.end();
   }
 }
 
