@@ -82,6 +82,14 @@ export function handleError(res, error, defaultMessage = 'Ocurrió un error inte
   }
 
   if (error.name === 'UnauthorizedError' || (typeof error.message === 'string' && error.message.toLowerCase().includes('no autorizado'))) {
+    if (error.code === AUTH_CONSTANTS.ERROR_CODES.RESET_CODE_INVALID) {
+      return sendError(
+        res,
+        'El código de recuperación es inválido o expiró',
+        AUTH_CONSTANTS.ERROR_CODES.RESET_CODE_INVALID,
+        AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED
+      );
+    }
     return sendError(res, 'No autorizado', AUTH_CONSTANTS.ERROR_CODES.INVALID_CREDENTIALS, AUTH_CONSTANTS.HTTP_STATUS.UNAUTHORIZED);
   }
 

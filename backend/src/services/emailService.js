@@ -1,6 +1,11 @@
 import { createTransport } from 'nodemailer';
 import { env, getResetPasswordUrl } from '../config/env.js';
-import { plantillaBienvenida, plantillaRecuperacion, plantillaEnvioHorario } from '../templates/emailTemplate.js';
+import {
+    plantillaBienvenida,
+    plantillaRecuperacion,
+    plantillaCodigoRecuperacion,
+    plantillaEnvioHorario
+} from '../templates/emailTemplate.js';
 
 const crearTransporter = () => {
     return createTransport({
@@ -108,6 +113,25 @@ export const enviarCorreoRecuperacion = async ({ email, nombreCompleto, token })
         return { success: true, messageId: info.messageId };
     } catch (error) {
         console.error(`❌ Error al enviar correo de recuperación a ${email}:`, error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+export const enviarCorreoCodigoRecuperacion = async ({ email, nombreCompleto, codigo, expiresInHours }) => {
+    try {
+        const transporter = crearTransporter();
+        const html = plantillaCodigoRecuperacion({ nombreCompleto, codigo, expiresInHours });
+        const info = await transporter.sendMail({
+            from: getFromAddress(),
+            to: email,
+            subject: `Código para recuperar tu contraseña - ${env.app.name}`,
+            html
+        });
+
+        console.log(`✅ Código de recuperación enviado a ${email} - ID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error(`❌ Error al enviar el código de recuperación a ${email}:`, error.message);
         return { success: false, error: error.message };
     }
 };

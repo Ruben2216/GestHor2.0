@@ -1613,6 +1613,19 @@ ALTER TABLE ONLY public.user_sessions
     ADD CONSTRAINT user_sessions_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(usuario_id) ON DELETE CASCADE;
 
 
+CREATE TABLE IF NOT EXISTS public.codigos_2fa (
+    codigo_2fa_id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES public.usuarios(usuario_id) ON DELETE CASCADE,
+    codigo_hash CHARACTER VARYING(255) NOT NULL,
+    fecha_creacion TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    fecha_expiracion TIMESTAMP WITH TIME ZONE NOT NULL,
+    intentos SMALLINT NOT NULL DEFAULT 0 CHECK (intentos BETWEEN 0 AND 5),
+    usado BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_codigos_2fa_usuario_expiracion
+    ON public.codigos_2fa USING btree (usuario_id, fecha_expiracion DESC);
+
 --
 -- PostgreSQL database dump complete
 --

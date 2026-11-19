@@ -1,13 +1,13 @@
 import * as userRepository from '../repositories/userRepository.js';
 import * as passwordResetRepository from '../repositories/passwordResetRepository.js';
-import * as refreshTokenRepository from '../repositories/refreshTokenRepository.js';
-import { hashPassword, generateRandomToken, hashToken, calculateExpiration } from '../utils/crypto.js';
-import { sendError } from '../utils/response.js';
+import * as recoveryCodeRepository from '../repositories/recoveryCodeRepository.js';
+import { dbConnection } from '../config/database.js';
+import { hashPassword, comparePassword, generateRecoveryCode, hashToken } from '../utils/crypto.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
-import { NotFoundError, ValidationError, UnauthorizedError } from '../utils/errors.js';
-import { enviarCorreoRecuperacion } from './emailService.js';
+import { UnauthorizedError } from '../utils/errors.js';
+import { enviarCorreoCodigoRecuperacion } from './emailService.js';
 
-const RESET_TOKEN_EXPIRES_HOURS = AUTH_CONSTANTS.RESET_TOKEN.EXPIRES_IN_HOURS;
+const RECOVERY_CODE_EXPIRES_HOURS = AUTH_CONSTANTS.RECOVERY_CODE.EXPIRES_IN_HOURS;
 
 export async function requestPasswordReset(email) {
   const user = await userRepository.findByEmail(email);
@@ -16,50 +16,72 @@ export async function requestPasswordReset(email) {
     return { success: true, message: RESPONSE_MESSAGES.RESET_EMAIL_SENT };
   }
 
-  const rawToken = generateRandomToken(AUTH_CONSTANTS.RESET_TOKEN.TOKEN_BYTES);
-  const tokenHash = hashToken(rawToken);
-  const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRES_HOURS * 60 * 60 * 1000);
-
-  await passwordResetRepository.revokeUserTokens(user.usuario_id);
-  await passwordResetRepository.saveResetToken({
+  const code = generateRecoveryCode();
+  const codeHash = await hashPassword(code);
+  const expiresAt = new Date(Date.now() + RECOVERY_CODE_EXPIRES_HOURS * 60 * 60 * 1000);
+  const savedCode = await recoveryCodeRepository.saveCode({
     userId: user.usuario_id,
-    tokenHash,
+    codeHash,
     expiresAt,
   });
 
   try {
-    await enviarCorreoRecuperacion({
+    const emailResult = await enviarCorreoCodigoRecuperacion({
       email: user.email,
       nombreCompleto: user.nombre || user.email,
-      nuevoToken: rawToken,
+      codigo: code,
+      expiresInHours: RECOVERY_CODE_EXPIRES_HOURS,
     });
+    if (!emailResult.success) {
+      throw new Error('No fue posible enviar el correo con el código de recuperación');
+    }
   } catch (error) {
-    console.error('Error enviando correo de recuperación:', error);
+    await recoveryCodeRepository.invalidateCode(savedCode.codigo_2fa_id);
+    throw error;
   }
 
-  return { success: true, message: RESPONSE_MESSAGES.RESET_EMAIL_SENT, token: process.env.NODE_ENV !== 'production' ? rawToken : undefined };
+  return { success: true, message: RESPONSE_MESSAGES.RESET_EMAIL_SENT };
 }
 
-export async function resetPassword(token, newPassword) {
-  const tokenHash = hashToken(token);
-  const resetToken = await passwordResetRepository.findValidTokenByHash(tokenHash);
-
-  if (!resetToken) {
-    throw new UnauthorizedError('Token de recuperación inválido o expirado', AUTH_CONSTANTS.ERROR_CODES.RESET_TOKEN_INVALID);
+export async function resetPassword(email, code, newPassword) {
+  const user = await userRepository.findByEmail(email);
+  if (!user) {
+    throw new UnauthorizedError('Código de recuperación inválido o expirado', AUTH_CONSTANTS.ERROR_CODES.RESET_CODE_INVALID);
   }
 
-  if (resetToken.used_at) {
-    throw new UnauthorizedError('Token ya utilizado', AUTH_CONSTANTS.ERROR_CODES.RESET_TOKEN_USED);
-  }
+  const codeAccepted = await dbConnection.tx(async (transaction) => {
+    const storedCode = await recoveryCodeRepository.findCurrentCodeForUpdate(transaction, user.usuario_id);
+    if (!storedCode) return false;
 
-  if (new Date() > new Date(resetToken.expires_at)) {
-    throw new UnauthorizedError('Token expirado', AUTH_CONSTANTS.ERROR_CODES.RESET_TOKEN_EXPIRED);
-  }
+    if (!(await comparePassword(code, storedCode.codigo_hash))) {
+      await recoveryCodeRepository.incrementFailedAttempts(transaction, storedCode.codigo_2fa_id);
+      return false;
+    }
 
-  const hashedPassword = await hashPassword(newPassword);
-  await userRepository.updatePasswordHash(resetToken.usuario_id, hashedPassword);
-  await passwordResetRepository.markUsed(resetToken.reset_token_id);
-  await refreshTokenRepository.revokeAllUserTokens(resetToken.usuario_id);
+    const usedCode = await recoveryCodeRepository.markUsed(transaction, storedCode.codigo_2fa_id);
+    if (!usedCode) return false;
+
+    const passwordHash = await hashPassword(newPassword);
+    await transaction.none(
+      'UPDATE usuarios SET password_hash = $1, fecha_actualizacion = NOW() WHERE usuario_id = $2',
+      [passwordHash, user.usuario_id]
+    );
+    await transaction.none(
+      'UPDATE refresh_tokens SET revoked_at = NOW() WHERE usuario_id = $1 AND revoked_at IS NULL',
+      [user.usuario_id]
+    );
+    await transaction.none(
+      `UPDATE user_sessions
+       SET revoked_at = NOW(), status = 'revoked'
+       WHERE usuario_id = $1 AND status = 'active'`,
+      [user.usuario_id]
+    );
+    return true;
+  });
+
+  if (!codeAccepted) {
+    throw new UnauthorizedError('Código de recuperación inválido o expirado', AUTH_CONSTANTS.ERROR_CODES.RESET_CODE_INVALID);
+  }
 
   return { success: true, message: RESPONSE_MESSAGES.PASSWORD_RESET };
 }

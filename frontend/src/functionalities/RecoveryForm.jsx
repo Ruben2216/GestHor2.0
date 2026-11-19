@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/RecoveryForm.css';
 import { crearSolicitudRecuperacion } from '../services/solicitudRecuperacionService';
+import { solicitarCodigoRecuperacion, restablecerConCodigo } from '../services/passwordRecoveryService';
 import { useToast } from '../components/ui/NotificacionFlotante';
 import usePageTitle from "../hooks/usePageTitle";
 
 const RecoveryForm = () => {
   usePageTitle("Ayuda");
   const navigate = useNavigate();
+  const [mode, setMode] = useState('request');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     registeredEmail: '',
     requestReason: '',
+    code: '',
+    newPassword: '',
   });
 
   const { notify } = useToast();
@@ -22,7 +26,7 @@ const RecoveryForm = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: name === 'code' ? value.replace(/\D/g, '').slice(0, 6) : value,
     }));
   };
   
@@ -33,14 +37,27 @@ const RecoveryForm = () => {
     setError('');
     
     try {
-      await crearSolicitudRecuperacion(
-        formData.registeredEmail,
-        formData.requestReason
-      );
-      notify({ type: 'success', message: 'Solicitud de recuperación enviada exitosamente. El administrador dará respuesta en un máximo de 24 horas hábiles.' });
-      navigate('/login');
+      if (mode === 'admin') {
+        await crearSolicitudRecuperacion(formData.registeredEmail, formData.requestReason);
+        notify({ type: 'success', message: 'Solicitud enviada. El administrador dará respuesta en un máximo de 24 horas hábiles.' });
+        navigate('/login');
+      } else if (mode === 'request') {
+        await solicitarCodigoRecuperacion(formData.registeredEmail);
+        setMode('verify');
+        notify({ type: 'success', message: 'Si el correo está registrado, recibirás un código de recuperación.' });
+      } else {
+        await restablecerConCodigo({
+          email: formData.registeredEmail,
+          code: formData.code,
+          newPassword: formData.newPassword,
+        });
+        notify({ type: 'success', message: 'Contraseña restablecida. Ya puedes iniciar sesión.' });
+        navigate('/login');
+      }
     } catch (err) {
-      const mensaje = err.response?.data?.mensaje || 'Error al enviar la solicitud. Por favor, intente nuevamente.';
+      const mensaje = err.response?.data?.message
+        || err.response?.data?.mensaje
+        || 'No se pudo completar la solicitud. Intenta nuevamente.';
       setError(mensaje);
       notify({ type: 'error', message: mensaje });
     } finally {
@@ -60,8 +77,16 @@ const RecoveryForm = () => {
       {/* Tarjeta del Formulario */}
       <div className="form-card-wrapper">
         <div className="form-card">
-          <h2 className="card-title">Contactar Administrador</h2>
-          <p className="card-subtitle">Complete los siguientes campos para enviar su solicitud</p>
+          <h2 className="card-title">
+            {mode === 'admin' ? 'Contactar Administrador' : mode === 'verify' ? 'Verificar código' : 'Recuperar contraseña'}
+          </h2>
+          <p className="card-subtitle">
+            {mode === 'admin'
+              ? 'Complete los campos para enviar una solicitud al administrador'
+              : mode === 'verify'
+                ? 'Ingresa el código enviado a tu correo y elige una contraseña nueva'
+                : 'Te enviaremos un código de 6 dígitos a tu correo registrado'}
+          </p>
 
           <form onSubmit={handleSubmit} className="recovery-form">
             {error && (
@@ -87,34 +112,102 @@ const RecoveryForm = () => {
                 onChange={handleChange}
                 placeholder="correo123@unach.mx"
                 required
+                readOnly={mode === 'verify'}
               />
             </div>
 
-            {/* Campo: Motivo de la solicitud */}
-            <div className="form-group">
-              <label htmlFor="requestReason">Motivo de la solicitud</label>
-              <textarea
-                id="requestReason"
-                name="requestReason"
-                value={formData.requestReason}
-                onChange={handleChange}
-                placeholder="Explique brevemente en que lo puede ayudar el administrador..."
-                rows="3" // Ajusta la altura
-                required
-                className="textarea-input"
-              ></textarea>
-            </div>
+            {mode === 'admin' && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="requestReason">Motivo de la solicitud</label>
+                  <textarea
+                    id="requestReason"
+                    name="requestReason"
+                    value={formData.requestReason}
+                    onChange={handleChange}
+                    placeholder="Explique brevemente en qué lo puede ayudar el administrador..."
+                    rows="3"
+                    required
+                    className="textarea-input"
+                  />
+                </div>
+                <p className="important-note">
+                  El administrador recibirá tu solicitud y responderá en un máximo de 24 horas hábiles.
+                </p>
+              </>
+            )}
 
-            {/* Mensaje Importante */}
-            <p className="important-note">
-              Importante: Su solicitud será enviada al administrador del sistema. Recibirá una respuesta en su correo en un plazo máximo de 24 horas hábiles.
-            </p>
+            {mode === 'verify' && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="code">Código de recuperación</label>
+                  <input
+                    type="text"
+                    id="code"
+                    name="code"
+                    value={formData.code}
+                    onChange={handleChange}
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    placeholder="123456"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="newPassword">Nueva contraseña</label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
+                <p className="important-note">
+                  El código vence en 24 horas y solo puede usarse una vez.
+                </p>
+              </>
+            )}
 
-            {/* Botón de Enviar */}
             <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? 'Enviando...' : 'Enviar solicitud'}
+              {loading
+                ? 'Procesando...'
+                : mode === 'admin'
+                  ? 'Enviar solicitud'
+                  : mode === 'verify'
+                    ? 'Restablecer contraseña'
+                    : 'Enviar código'}
             </button>
           </form>
+
+          <div className="back-link-container">
+            {mode === 'verify' ? (
+              <button
+                type="button"
+                className="back-link"
+                onClick={() => {
+                  setMode('request');
+                  setFormData((previous) => ({ ...previous, code: '', newPassword: '' }));
+                  setError('');
+                }}
+              >
+                Usar otro correo
+              </button>
+            ) : mode === 'admin' ? (
+              <button type="button" className="back-link" onClick={() => setMode('request')}>
+                Recuperar contraseña con código
+              </button>
+            ) : (
+              <button type="button" className="back-link" onClick={() => setMode('admin')}>
+                ¿Prefieres contactar al administrador?
+              </button>
+            )}
+          </div>
 
           {/* Enlace de Volver */}
           <div className="back-link-container">

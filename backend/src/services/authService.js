@@ -248,8 +248,8 @@ export async function requestPasswordReset(email) {
   return passwordService.requestPasswordReset(email);
 }
 
-export async function resetPassword(token, newPassword) {
-  return passwordService.resetPassword(token, newPassword);
+export async function resetPassword(email, code, newPassword) {
+  return passwordService.resetPassword(email, code, newPassword);
 }
 
 export async function getMe(userId) {

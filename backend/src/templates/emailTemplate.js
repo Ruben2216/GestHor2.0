@@ -114,6 +114,44 @@ export const plantillaRecuperacion = ({ nombreCompleto, nuevoToken }) => {
     `.trim();
 };
 
+export const plantillaCodigoRecuperacion = ({ nombreCompleto, codigo, expiresInHours }) => {
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de recuperación - GestHor</title>
+    <style>
+        ${emailStyles}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema GestHor</h1>
+            <p>Recuperación de contraseña</p>
+        </div>
+        <div class="content">
+            <p>Hola <strong>${nombreCompleto}</strong>,</p>
+            <p>Usa este código de 6 dígitos para restablecer tu contraseña:</p>
+            <div class="token-box">
+                <div class="token-label">Código de recuperación</div>
+                <div class="token-value">${codigo}</div>
+            </div>
+            <p>El código vence en <strong>${expiresInHours} horas</strong> y solo puede utilizarse una vez.</p>
+            <p>Si no solicitaste recuperar tu contraseña, puedes ignorar este correo.</p>
+        </div>
+        <div class="footer">
+            <p><strong>Sistema GestHor</strong></p>
+            <p>© ${new Date().getFullYear()} - Este es un correo automático</p>
+        </div>
+    </div>
+</body>
+</html>
+    `.trim();
+};
+
 export const plantillaEnvioHorario = ({ nombreCompleto }) => {
     return `
 <!DOCTYPE html>

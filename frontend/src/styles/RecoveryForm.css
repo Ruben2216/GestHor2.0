@@ -343,6 +343,14 @@
   transition: all 0.3s ease;
 }
 
+.back-link-container button.back-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
 .back-link::after {
   content: '';
   position: absolute;
