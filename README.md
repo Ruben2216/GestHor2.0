@@ -77,6 +77,19 @@ El script se niega a reemplazar una base que ya exista. Después de crearla,
 aplicación use esa copia. Cada dispositivo tendrá una base independiente:
 los cambios de datos no se sincronizan entre compañeros.
 
+# Códigos para recuperar contraseña
+La recuperación de contraseña envía un código de 6 dígitos por correo. La tabla
+`codigos_2fa` conserva únicamente su hash y la fecha de expiración (24 horas).
+Para actualizar una base existente, desde PowerShell ejecuta la migración desde
+la carpeta `backend`:
+
+```powershell
+node run-migrations.js
+```
+
+La copia de práctica también incluye la tabla al crearse desde
+`backend/src/database/practice_schema.sql`.
+
 # env
 debe estar en la carpeta backend (ver backend/.env.example)
 

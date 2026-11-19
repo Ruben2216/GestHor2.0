@@ -119,8 +119,8 @@ async function runTests() {
       body: JSON.stringify({ email: 'test.admin@unach.mx' })
     });
     let forgotData = await forgotRes.json();
-    if (forgotRes.ok && !forgotData.token) { // Ensure token is not leaked
-      log('Forgot password (No filtra token real)', true);
+    if (forgotRes.ok && !forgotData.token && !forgotData.code) { // Ensure recovery code is not leaked
+      log('Forgot password (No filtra código real)', true);
     } else {
       log('Forgot password', false, JSON.stringify(forgotData));
     }

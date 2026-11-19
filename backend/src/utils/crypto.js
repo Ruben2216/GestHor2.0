@@ -14,6 +14,10 @@ export function generateRandomToken(bytes = 32) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
+export function generateRecoveryCode() {
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+}
+
 export function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }

@@ -69,11 +69,15 @@ export function validateForgotPassword(email) {
   return email.trim();
 }
 
-export function validateResetPassword(token, newPassword) {
+export function validateResetPassword(email, code, newPassword) {
   const errors = [];
 
-  if (!token || typeof token !== 'string' || token.trim().length === 0) {
-    errors.push('Token de recuperación requerido');
+  if (!email || typeof email !== 'string' || !emailRegex.test(email.trim())) {
+    errors.push('Correo inválido');
+  }
+
+  if (!code || typeof code !== 'string' || !/^\d{6}$/.test(code)) {
+    errors.push('El código de recuperación debe tener 6 dígitos');
   }
 
   if (!newPassword || typeof newPassword !== 'string') {
@@ -86,5 +90,5 @@ export function validateResetPassword(token, newPassword) {
     throw new ValidationError('Datos de entrada inválidos', errors);
   }
 
-  return { token: token.trim(), newPassword };
+  return { email: email.trim(), code, newPassword };
 }

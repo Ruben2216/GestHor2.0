@@ -13,6 +13,10 @@ export const AUTH_CONSTANTS = {
     EXPIRES_IN_HOURS: 1,
     TOKEN_BYTES: 32,
   },
+  RECOVERY_CODE: {
+    EXPIRES_IN_HOURS: 24,
+    MAX_ATTEMPTS: 5,
+  },
   REFRESH_TOKEN: {
     ROTATION_ENABLED: true,
     REUSE_DETECTION: true,
@@ -36,6 +40,7 @@ export const AUTH_CONSTANTS = {
     RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
     RESET_TOKEN_EXPIRED: 'RESET_TOKEN_EXPIRED',
     RESET_TOKEN_USED: 'RESET_TOKEN_USED',
+    RESET_CODE_INVALID: 'RESET_CODE_INVALID',
   },
   HTTP_STATUS: {
     OK: 200,
@@ -61,7 +66,7 @@ export const RESPONSE_MESSAGES = {
   LOGOUT_SUCCESS: 'Sesión cerrada correctamente',
   REFRESH_SUCCESS: 'Token renovado correctamente',
   PASSWORD_CHANGED: 'Contraseña actualizada correctamente',
-  RESET_EMAIL_SENT: 'Si el correo existe, se enviará un enlace de recuperación',
+  RESET_EMAIL_SENT: 'Si el correo está registrado, se enviará un código de recuperación',
   PASSWORD_RESET: 'Contraseña restablecida correctamente',
   UNAUTHORIZED: 'No autorizado',
   FORBIDDEN: 'No tiene permisos para acceder a este recurso',
