@@ -4,9 +4,12 @@ import * as tokenService from './tokenService.js';
 import * as refreshTokenRepository from '../repositories/refreshTokenRepository.js';
 import * as sessionService from './sessionService.js';
 import * as passwordService from './passwordService.js';
-import { hashToken, hashPassword, comparePassword, generateRandomToken } from '../utils/crypto.js';
+import * as recoveryCodeRepository from '../repositories/recoveryCodeRepository.js';
+import { hashToken, hashPassword, comparePassword, generateRandomToken, generateRecoveryCode } from '../utils/crypto.js';
+import { enviarCorreoCodigo2FA } from './emailService.js';
 import { UnauthorizedError, ValidationError, TokenReusedError, NotFoundError, TooManyRequestsError } from '../utils/errors.js';
 import { AUTH_CONSTANTS, RESPONSE_MESSAGES } from '../constants/auth.constants.js';
+import { dbConnection } from '../config/database.js';
 
 // Hash de una contraseña aleatoria: se compara contra él cuando el correo no existe,
 // para que la respuesta tarde lo mismo y no se pueda saber qué correos están registrados
@@ -69,6 +72,51 @@ export async function login(email, password, ipOrigen, userAgent) {
   }
 
   clearFailedAttempts(normalizedEmail);
+
+  // Generar y enviar código 2FA
+  const code = generateRecoveryCode(); // 6 dígitos
+  const codeHash = await hashPassword(code);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+  await recoveryCodeRepository.saveCode({ userId: user.usuario_id, codeHash, expiresAt });
+
+  // Enviar código por correo (no bloqueante si falla)
+  enviarCorreoCodigo2FA({
+    email: user.email,
+    nombreCompleto: user.nombre || user.email,
+    codigo: code,
+  }).catch((err) => console.warn('⚠️ No se pudo enviar código 2FA:', err.message));
+
+  // En desarrollo, mostrar el código en consola para pruebas
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\n🔐 [2FA] Código para ${user.email}: ${code}\n`);
+  }
+
+  return { requires2fa: true, userId: user.usuario_id };
+}
+
+export async function verify2fa(userId, code, ipOrigen, userAgent) {
+  if (!userId || !code) {
+    throw new ValidationError('Se requiere userId y código 2FA', 'MISSING_FIELDS');
+  }
+
+  const user = await userService.getUserById(userId);
+
+  const result = await dbConnection.tx(async (transaction) => {
+    const storedCode = await recoveryCodeRepository.findCurrentCodeForUpdate(transaction, userId);
+    if (!storedCode) {
+      throw new UnauthorizedError('Código inválido, expirado o ya utilizado', 'INVALID_2FA_CODE');
+    }
+
+    const codeValido = await comparePassword(String(code).trim(), storedCode.codigo_hash);
+    if (!codeValido) {
+      await recoveryCodeRepository.incrementFailedAttempts(transaction, storedCode.codigo_2fa_id);
+      throw new UnauthorizedError('Código 2FA incorrecto', 'INVALID_2FA_CODE');
+    }
+
+    await recoveryCodeRepository.markUsed(transaction, storedCode.codigo_2fa_id);
+    return true;
+  });
+
   return createUserSession(user, ipOrigen, userAgent);
 }
 

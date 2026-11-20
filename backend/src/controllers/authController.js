@@ -9,6 +9,37 @@ import { AppError } from '../utils/errors.js';
 // ============================================================================
 
 /**
+ * Verificar código 2FA
+ * POST /api/auth/verify-2fa
+ */
+export async function verify2fa(req, res) {
+  try {
+    const { userId, code } = req.body;
+
+    if (!userId || !code) {
+      return sendError(res, 'Se requiere userId y código', 'MISSING_FIELDS', 400);
+    }
+
+    const ipOrigen = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    const result = await authService.verify2fa(userId, code, ipOrigen, userAgent);
+
+    return sendSuccess(res, {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      usuario: result.usuario,
+    }, 'Verificación 2FA exitosa');
+  } catch (error) {
+    if (error instanceof AppError && error.statusCode < 500) {
+      return sendError(res, error.message, error.code, error.statusCode, error.details);
+    }
+    console.error('Error en verify2fa:', error);
+    return sendError(res, RESPONSE_MESSAGES.INTERNAL_ERROR, 'INTERNAL_ERROR', AUTH_CONSTANTS.HTTP_STATUS.INTERNAL_SERVER_ERROR);
+  }
+}
+
+/**
  * Iniciar sesión
  * POST /api/auth/login
  */
@@ -23,6 +54,12 @@ export async function login(req, res) {
     const userAgent = req.headers['user-agent'] || 'unknown';
 
     const result = await authService.login(email, password, ipOrigen, userAgent);
+
+    // Si se requiere verificación 2FA, retornar señal sin tokens
+    if (result.requires2fa) {
+      return sendSuccess(res, { requires2fa: true, userId: result.userId }, 'Se requiere verificación de dos factores');
+    }
+
     req.user = {
       id: result.usuario.id,
       email: result.usuario.email,

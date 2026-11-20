@@ -4,6 +4,7 @@ import styles from "../styles/LoginForm.module.css";
 import PasswordInput from "../components/ui/PasswordInput";
 import usePageTitle from "../hooks/usePageTitle";
 import { useAuth } from "../hooks/useAuth";
+import TwoFactorForm from "./TwoFactorForm";
 
 function LoginForm() {
   usePageTitle("Ingresar al sitio");
@@ -13,10 +14,11 @@ function LoginForm() {
   const [error, setError] = useState(null);
   const [infoMsg, setInfoMsg] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const [twoFAState, setTwoFAState] = useState(null); // { userId, email }
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login, isAuthenticated, role } = useAuth();
+  const { login, complete2faLogin, isAuthenticated, role } = useAuth();
 
   // Si ya está autenticado, redirigir automáticamente
   useEffect(() => {
@@ -88,6 +90,12 @@ function LoginForm() {
     try {
       const result = await login(correo, contraseña, tipoUsuario);
 
+      if (result.requires2fa) {
+        // Mostrar pantalla de verificación 2FA
+        setTwoFAState({ userId: result.userId, email: result.email });
+        return;
+      }
+
       if (!result.success) {
         setError(result.message || "Credenciales incorrectas");
         return;
@@ -100,6 +108,26 @@ function LoginForm() {
       setCargando(false);
     }
   };
+
+  // Si está esperando verificación 2FA, renderizar pantalla 2FA
+  if (twoFAState) {
+    return (
+      <TwoFactorForm
+        userId={twoFAState.userId}
+        email={twoFAState.email}
+        onSuccess={async (sessionData) => {
+          const result = await complete2faLogin(sessionData);
+          if (result.success) {
+            redirectByRole(result.role);
+          }
+        }}
+        onCancel={() => {
+          setTwoFAState(null);
+          setError(null);
+        }}
+      />
+    );
+  }
 
   const handleGoogleLogin = () => {
     // prompt=select_account fuerza la selección de cuenta aunque haya sesión en Google

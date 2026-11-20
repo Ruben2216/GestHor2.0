@@ -83,6 +83,17 @@ export function AuthProvider({ children }) {
       });
 
       const resData = response.data?.data || response.data;
+
+      // Si el backend requiere 2FA, retornar señal sin crear sesión aún
+      if (resData?.requires2fa) {
+        return {
+          success: false,
+          requires2fa: true,
+          userId: resData.userId,
+          email,
+        };
+      }
+
       const accessToken = resData?.accessToken;
       const refreshToken = resData?.refreshToken;
       const usuario = resData?.usuario;
@@ -125,6 +136,41 @@ export function AuthProvider({ children }) {
         message,
       };
     }
+  };
+
+  /**
+   * Completar login con código 2FA
+   */
+  const complete2faLogin = async (sessionData) => {
+    const { accessToken, refreshToken, usuario } = sessionData;
+
+    if (!accessToken || !usuario) {
+      throw new Error('Datos de sesión inválidos tras 2FA');
+    }
+
+    const userData = {
+      id: usuario.id || usuario.usuario_id,
+      usuario_id: usuario.id || usuario.usuario_id,
+      email: usuario.email,
+      rol: usuario.rol || usuario.nombre_rol,
+      nombre: usuario.nombre || usuario.nombres || usuario.email.split('@')[0],
+    };
+
+    authStorage.saveSession({
+      accessToken,
+      refreshToken,
+      usuario: userData,
+      permisos: [],
+    });
+
+    setUser(userData);
+    await loadUserPermissions();
+
+    return {
+      success: true,
+      user: userData,
+      role: getNormalizedRole(userData.rol),
+    };
   };
 
   /**
@@ -182,6 +228,7 @@ export function AuthProvider({ children }) {
     isLoading,
     login,
     logout,
+    complete2faLogin,
     hasRole,
     hasPermission,
     can: hasPermission,

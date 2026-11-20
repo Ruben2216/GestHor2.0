@@ -4,7 +4,8 @@ import {
     plantillaBienvenida,
     plantillaRecuperacion,
     plantillaCodigoRecuperacion,
-    plantillaEnvioHorario
+    plantillaEnvioHorario,
+    plantillaCodigo2FA
 } from '../templates/emailTemplate.js';
 
 const crearTransporter = () => {
@@ -186,6 +187,42 @@ export const enviarCorreoVerificacion = async ({ email, nombreCompleto, token })
         return { success: true, messageId: info.messageId };
     } catch (error) {
         console.error(`❌ Error al enviar correo de verificación a ${email}:`, error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+export const enviarCorreoCodigo2FA = async ({ email, nombreCompleto, codigo }) => {
+    try {
+        const transporter = crearTransporter();
+        const html = plantillaCodigo2FA({ nombreCompleto, codigo });
+        const info = await transporter.sendMail({
+            from: getFromAddress(),
+            to: email,
+            subject: `Código de verificación de acceso - GestHor`,
+            html
+        });
+        console.log(`✅ Código 2FA enviado a ${email} - ID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error(`❌ Error al enviar código 2FA a ${email}:`, error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+export const enviarCorreoCodigo2FA = async ({ email, nombreCompleto, codigo }) => {
+    try {
+        const transporter = crearTransporter();
+        const html = plantillaCodigo2FA({ nombreCompleto, codigo });
+        const info = await transporter.sendMail({
+            from: getFromAddress(),
+            to: email,
+            subject: `Código de verificación de acceso - GestHor`,
+            html
+        });
+        console.log(`✅ Código 2FA enviado a ${email} - ID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error(`❌ Error al enviar código 2FA a ${email}:`, error.message);
         return { success: false, error: error.message };
     }
 };

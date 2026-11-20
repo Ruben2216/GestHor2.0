@@ -195,3 +195,54 @@ export const plantillaEnvioHorario = ({ nombreCompleto }) => {
 </html>
     `.trim();
 };
+
+
+export const plantillaCodigo2FA = ({ nombreCompleto, codigo }) => {
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de acceso - GestHor</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 0; }
+        .container { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(26,95,180,0.10); }
+        .header { background: linear-gradient(135deg, #1a5fb4 0%, #298ce7 100%); padding: 32px 24px 24px; text-align: center; }
+        .header h1 { color: #fff; margin: 0 0 4px; font-size: 1.7rem; letter-spacing: 1px; }
+        .header p { color: #bfdbfe; margin: 0; font-size: 0.95rem; }
+        .content { padding: 32px 32px 24px; }
+        .content p { color: #333; line-height: 1.6; margin: 0 0 16px; }
+        .code-box { background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 12px; text-align: center; padding: 24px 16px; margin: 24px 0; }
+        .code-label { color: #1a5fb4; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+        .code-value { font-size: 2.8rem; font-weight: 800; letter-spacing: 10px; color: #1a5fb4; font-family: 'Courier New', monospace; }
+        .warning { background: #fff7ed; border-left: 4px solid #f97316; border-radius: 6px; padding: 12px 16px; color: #9a3412; font-size: 0.9rem; margin: 16px 0; }
+        .footer { background: #f8fafc; padding: 16px 32px; text-align: center; color: #94a3b8; font-size: 0.82rem; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GestHor</h1>
+            <p>Verificación de acceso en dos pasos</p>
+        </div>
+        <div class="content">
+            <p>Hola <strong>${nombreCompleto}</strong>,</p>
+            <p>Alguien (esperamos que seas tú) está intentando iniciar sesión en tu cuenta. Usa el siguiente código de verificación:</p>
+            <div class="code-box">
+                <div class="code-label">Código de acceso</div>
+                <div class="code-value">${codigo}</div>
+            </div>
+            <div class="warning">
+                ⏱ Este código expira en <strong>10 minutos</strong> y solo puede usarse una vez.
+            </div>
+            <p>Si no estás intentando iniciar sesión, alguien podría tener tus credenciales. Te recomendamos cambiar tu contraseña inmediatamente.</p>
+        </div>
+        <div class="footer">
+            <p><strong>Sistema GestHor — UNACH</strong></p>
+            <p>© ${new Date().getFullYear()} — Este es un correo automático, por favor no respondas.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+};

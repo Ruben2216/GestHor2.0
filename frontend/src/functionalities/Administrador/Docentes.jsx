@@ -95,7 +95,7 @@ export default function Docentes() {
             // Recargamos ambos para mantener la consistencia
             cargarDocentes();
         } catch (error) {
-            notify({ type: 'error', message: error.response?.data?.mensaje || 'Error' });
+            notify({ type: 'error', message: error.message || error.response?.data?.mensaje || 'Error al registrar docente' });
         }
     };
 
