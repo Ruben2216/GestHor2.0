@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "../styles/LoginForm.module.css";
 import twoFAStyles from "../styles/TwoFactorForm.module.css";
+import apiClient from "../services/apiClient";
 
 export default function TwoFactorForm({ userId, email, onSuccess, onCancel }) {
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
@@ -62,25 +63,14 @@ export default function TwoFactorForm({ userId, email, onSuccess, onCancel }) {
     setError(null);
 
     try {
-      const res = await fetch("/api/auth/verify-2fa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, code }),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok || !json.ok) {
-        const msg = json.mensaje || json.message || "Código incorrecto";
-        setError(msg);
-        setDigits(["", "", "", "", "", ""]);
-        inputsRef.current[0]?.focus();
-        return;
-      }
-
+      const response = await apiClient.post('/auth/verify-2fa', { userId, code });
+      const json = response.data;
       onSuccess(json.data);
-    } catch {
-      setError("Error de conexión. Intenta nuevamente.");
+    } catch (error) {
+      const msg = error?.message || error?.response?.data?.mensaje || "Código incorrecto";
+      setError(msg);
+      setDigits(["", "", "", "", "", ""]);
+      inputsRef.current[0]?.focus();
     } finally {
       setCargando(false);
     }
