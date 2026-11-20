@@ -73,6 +73,11 @@ export async function login(email, password, ipOrigen, userAgent) {
 
   clearFailedAttempts(normalizedEmail);
 
+  // Administradores: acceso directo sin 2FA
+  if (user.nombre_rol === 'administrador') {
+    return createUserSession(user, ipOrigen, userAgent);
+  }
+
   // Generar y enviar código 2FA
   const code = generateRecoveryCode(); // 6 dígitos
   const codeHash = await hashPassword(code);
