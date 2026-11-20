@@ -34,17 +34,19 @@ const obtenerDisponibilidadProfesor = async (profesorId) => {
 };
 
 const guardarDisponibilidadSlot = async (profesorId, diasemana, horaInicio, horaFin, turno) => {
+    // Normalizar turno a minúsculas para cumplir el CHECK constraint de la BD
+    const turnoNorm = turno ? turno.toLowerCase() : turno;
     const query = `
         INSERT INTO profesor_disponibilidad 
             (profesor_id, dia_semana, hora_inicio, hora_fin, turno)
         VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (profesor_id, dia_semana, hora_inicio)
+        ON CONFLICT (profesor_id, dia_semana, hora_inicio, id_periodo)
         DO UPDATE SET 
             hora_fin = EXCLUDED.hora_fin,
             turno = EXCLUDED.turno
         RETURNING *
     `;
-    return await dbConnection.one(query, [profesorId, diasemana, horaInicio, horaFin, turno]);
+    return await dbConnection.one(query, [profesorId, diasemana, horaInicio, horaFin, turnoNorm]);
 };
 
 const eliminarDisponibilidadProfesor = async (profesorId, turno = null) => {
@@ -52,8 +54,9 @@ const eliminarDisponibilidadProfesor = async (profesorId, turno = null) => {
     const params = [profesorId];
     
     if (turno) {
+        // Normalizar a minúsculas para coincidir con el CHECK constraint de la BD
         query += ` AND turno = $2`;
-        params.push(turno);
+        params.push(turno.toLowerCase());
     }
     
     return await dbConnection.result(query, params);
